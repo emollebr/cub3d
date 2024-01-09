@@ -202,10 +202,10 @@ int	main()
 
    img.player.x = 22.0;
    img.player.y = 11.5;
-   img.player.dir_x = -1.0;
-   img.player.dir_y = 0.0;
-   img.player.plane_x = 0.0;
-   img.player.plane_y = 0.66;
+   img.player.dir_x = 0.0;
+   img.player.dir_y = -1.0;
+   img.player.plane_x = 1.0;
+   img.player.plane_y = 0.00;
     
     mlx_hook(img.mlx_win, 17, 0, close_program, &img);
     mlx_hook(img.mlx_win, 2, 1L << 0, key_hook, &img);
