@@ -3,57 +3,75 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lejimene <lejimene@student.42.fr>          +#+  +:+       +#+        */
+/*   By: levijimenezrufes <levijimenezrufes@stud    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 17:15:39 by lejimene          #+#    #+#             */
-/*   Updated: 2024/01/07 19:14:17 by lejimene         ###   ########.fr       */
+/*   Updated: 2024/01/10 16:41:12 by levijimenez      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
 #include "includes/cub3d.h"
-#include <math.h>
 
-void	my_mlx_pixel_put(t_data *img, int x, int y, int color)
+
+void my_mlx_pixel_put(t_data *img, int x, int y, int color)
 {
-	char	*dst;
+    char *dst;
 
-	dst = img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8));
-	*(unsigned int *)dst = color;
+    dst = img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8));
+    *(unsigned int *)dst = color;
 }
 
-int     close_program(t_data *img)
+int close_program(t_data *img)
 {
     mlx_destroy_window(img->mlx, img->mlx_win);
     exit(0);
 }
 
-void    update_image(t_data *img)
+void update_image(t_data *img)
 {
-    mlx_put_image_to_window(img->mlx, img->mlx_win, img->img, 0, 0);
+    // Load overlay image
+    int img_width;
+    int img_height;
+    char *relative_path = "./images/hbhbjhb.xpm";
+    void *overlay_img = mlx_xpm_file_to_image(img->mlx, relative_path, &img_width, &img_height);
+
+    if (overlay_img != NULL)
+    {
+
+
+        // Update the window
+        mlx_put_image_to_window(img->mlx, img->mlx_win, img->img, 0, 0);
+		        // Put the overlay image to the window at position (0, 0)
+        mlx_put_image_to_window(img->mlx, img->mlx_win, overlay_img, 0, 0);
+        mlx_do_sync(img->mlx);
+    }
+    else
+    {
+        // Handle error, e.g., print an error message or exit the program
+        fprintf(stderr, "Error loading overlay image.\n");
+        exit(EXIT_FAILURE);
+    }
 }
 
-void    cast_rays(t_data *img)
+void cast_rays(t_data *img)
 {
-    int     x;
-    t_ray   ray;
+    int x;
+    t_ray ray;
 
     x = 0;
     while (x < WIDTH)
     {
-        ray.camera_x = 2 * x / (double)WIDTH - 1;
+        ray.camera_x = 2 * x / (double)WIDTH - 1; //x-coordinate in camera space
         ray.ray_dir_x = img->player.dir_x + img->player.plane_x * ray.camera_x;
         ray.ray_dir_y = img->player.dir_y + img->player.plane_y * ray.camera_x;
 
-        // Map coordinates
         ray.map_x = (int)img->player.x;
         ray.map_y = (int)img->player.y;
 
-        // Delta distances
-        ray.delta_dist_x = fabs(1 / ray.ray_dir_x);
-        ray.delta_dist_y = fabs(1 / ray.ray_dir_y);
+ 		ray.delta_dist_x = (ray.ray_dir_x == 0) ? 1e30 : fabs(1 / ray.ray_dir_x);
+		ray.delta_dist_y = (ray.ray_dir_y == 0) ? 1e30 : fabs(1 / ray.ray_dir_y);
 
-        // Step and initial side distances
         if (ray.ray_dir_x < 0)
         {
             ray.step_x = -1;
@@ -75,7 +93,6 @@ void    cast_rays(t_data *img)
             ray.side_dist_y = (ray.map_y + 1.0 - img->player.y) * ray.delta_dist_y;
         }
 
-        // Perform DDA (Digital Differential Analyzer) algorithm
         while (ray.hit == 0)
         {
             if (ray.side_dist_x < ray.side_dist_y)
@@ -91,21 +108,16 @@ void    cast_rays(t_data *img)
                 ray.side = 1;
             }
 
-            // Check if the ray hits a wall
             if (worldMap[ray.map_x][ray.map_y] == 1)
                 ray.hit = 1;
         }
 
-        // Calculate distance projected on camera direction (Euclidean distance will give fisheye effect!)
         if (ray.side == 0)
-            ray.perp_wall_dist = (ray.map_x - img->player.x + (1 - ray.step_x) / 2) / ray.ray_dir_x;
+			ray.perp_wall_dist = (ray.map_x - img->player.x + (1 - ray.step_x) / 2) / ray.ray_dir_x;
         else
             ray.perp_wall_dist = (ray.map_y - img->player.y + (1 - ray.step_y) / 2) / ray.ray_dir_y;
 
-        // Calculate height of line to draw on screen
         int line_height = (int)(HEIGHT / ray.perp_wall_dist);
-
-        // Calculate lowest and highest pixel to fill in the current stripe
         int draw_start = -line_height / 2 + HEIGHT / 2;
         if (draw_start < 0)
             draw_start = 0;
@@ -113,10 +125,8 @@ void    cast_rays(t_data *img)
         if (draw_end >= HEIGHT)
             draw_end = HEIGHT - 1;
 
-        // Choose wall color based on the side
         int color = (ray.side == 1) ? 0x00FF0000 : 0x0000FF00;
 
-        // Draw the column
         int y = draw_start;
         while (y <= draw_end)
         {
@@ -124,93 +134,177 @@ void    cast_rays(t_data *img)
             y++;
         }
 
-        // Reset for the next column
         ray.hit = 0;
         x++;
     }
 }
 
-int     key_hook(int keycode, t_data *img)
+
+int key_press(int keycode, t_keys *keys)
 {
-    printf("%d\n", keycode);
-    if (keycode == 53 || keycode == 65307) // ESC key
-        close_program(img);
-    // Handle other key events if needed
-    if (keycode == 119) // W
-    {
-        // Increase player's speed when moving forward
-        img->player.x += img->player.dir_x * MOV_SPEED;
-        img->player.y += img->player.dir_y * MOV_SPEED;
-    }
-    if (keycode == 115) // S
-    {
-        // Decrease player's speed when moving backward
-        img->player.x -= img->player.dir_x * MOV_SPEED;
-        img->player.y -= img->player.dir_y * MOV_SPEED;
-    }
-    if (keycode == 97) // A
-      {
-        // Decrease player's speed when moving tot he left
-        img->player.x -= img->player.plane_x * MOV_SPEED;
-        img->player.y -= img->player.plane_y * MOV_SPEED;
-    }
-    if (keycode == 100) // D
-       {
-        // Increase player's speed when moving to the right
-        img->player.x += img->player.plane_x * MOV_SPEED;
-        img->player.y += img->player.plane_y * MOV_SPEED;
-    }
-    if (keycode == 65363)
-    {
-         // Rotate the player's direction to the left
-        double oldDirX = img->player.dir_x;
-        img->player.dir_x = img->player.dir_x * cos(-ROT_SPEED) - img->player.dir_y * sin(-ROT_SPEED);
-        img->player.dir_y = oldDirX * sin(-ROT_SPEED) + img->player.dir_y * cos(-ROT_SPEED);
-    }
-    if (keycode == 65361)
-    {
-        // Rotate the player's direction to the right
-        double oldDirX = img->player.dir_x;
-        img->player.dir_x = img->player.dir_x * cos(ROT_SPEED) - img->player.dir_y * sin(ROT_SPEED);
-        img->player.dir_y = oldDirX * sin(ROT_SPEED) + img->player.dir_y * cos(ROT_SPEED);
-    }
+    if (keycode == 13) // W key
+        keys->w = true;
+    if (keycode == 1)  // S key
+        keys->s = true;
+    if (keycode == 0)  // A key
+        keys->a = true;
+    if (keycode == 2)  // D key
+        keys->d = true;
+    if (keycode == 123) // Left arrow key
+        keys->left = true;
+    if (keycode == 124) // Right arrow key
+        keys->right = true;
+
     return (0);
 }
 
-int     render_frame(t_data *img)
+int key_release(int keycode, t_keys *keys)
 {
-    // Clear the previous frame
+    if (keycode == 13) // W key
+        keys->w = false;
+    if (keycode == 1)  // S key
+        keys->s = false;
+    if (keycode == 0)  // A key
+        keys->a = false;
+    if (keycode == 2)  // D key
+        keys->d = false;
+    if (keycode == 123) // Left arrow key
+        keys->left = false;
+    if (keycode == 124) // Right arrow key
+        keys->right = false;
+
+    return (0);
+}
+int key_hook(t_keys *keys)
+{
+    t_data *img = keys->img; // Assuming keys->img holds a reference to your t_data structure
+
+    double oldPlayerX = img->player.x;
+    double oldPlayerY = img->player.y;
+    // Handle key presses
+    if (keys->w)
+    {
+        img->player.x += img->player.dir_x * MOV_SPEED;
+        img->player.y += img->player.dir_y * MOV_SPEED;
+    }
+    if (keys->s)
+    {
+        img->player.x -= img->player.dir_x * MOV_SPEED;
+        img->player.y -= img->player.dir_y * MOV_SPEED;
+    }
+    if (keys->a)
+    {
+        img->player.x -= img->player.plane_x * MOV_SPEED;
+        img->player.y -= img->player.plane_y * MOV_SPEED;
+    }
+    if (keys->d)
+    {
+        img->player.x += img->player.plane_x * MOV_SPEED;
+        img->player.y += img->player.plane_y * MOV_SPEED;
+    }
+
+	    // Check for collisions with walls
+    if (worldMap[(int)img->player.x][(int)oldPlayerY] == 1)
+    {
+        // Undo the player's movement if there is a wall in the new X position
+        img->player.x = oldPlayerX;
+    }
+    if (worldMap[(int)oldPlayerX][(int)img->player.y] == 1)
+    {
+        // Undo the player's movement if there is a wall in the new Y position
+        img->player.y = oldPlayerY;
+    }
+
+    double oldDirY = img->player.dir_y;  // Add this line
+    double oldPlaneY = img->player.plane_y;
+	
+    if (keys->left)
+    {
+        // Handle rotation to the left
+        double oldDirX = img->player.dir_x;
+        img->player.dir_x = img->player.dir_x * cos(-ROT_SPEED) - img->player.dir_y * sin(-ROT_SPEED);
+        img->player.dir_y = oldDirX * sin(-ROT_SPEED) + img->player.dir_y * cos(-ROT_SPEED);
+
+        double oldPlaneX = img->player.plane_x;
+        img->player.plane_x = img->player.plane_x * cos(-ROT_SPEED) - img->player.plane_y * sin(-ROT_SPEED);
+        img->player.plane_y = oldPlaneX * sin(-ROT_SPEED) + img->player.plane_y * cos(-ROT_SPEED);
+		        // Check for collisions with walls after rotation
+        if (worldMap[(int)img->player.x][(int)oldPlayerY] == 1 || worldMap[(int)oldPlayerX][(int)img->player.y] == 1)
+        {
+            // Undo the rotation if there is a wall
+            img->player.dir_x = oldDirX;
+            img->player.dir_y = oldDirY;
+            img->player.plane_x = oldPlaneX;
+            img->player.plane_y = oldPlaneY;
+        }
+
+    }
+    if (keys->right)
+    {
+        // Handle rotation to the right
+        double oldDirX = img->player.dir_x;
+        img->player.dir_x = img->player.dir_x * cos(ROT_SPEED) - img->player.dir_y * sin(ROT_SPEED);
+        img->player.dir_y = oldDirX * sin(ROT_SPEED) + img->player.dir_y * cos(ROT_SPEED);
+
+        double oldPlaneX = img->player.plane_x;
+        img->player.plane_x = img->player.plane_x * cos(ROT_SPEED) - img->player.plane_y * sin(ROT_SPEED);
+        img->player.plane_y = oldPlaneX * sin(ROT_SPEED) + img->player.plane_y * cos(ROT_SPEED);
+		        // Check for collisions with walls after rotation
+        if (worldMap[(int)img->player.x][(int)oldPlayerY] == 1 || worldMap[(int)oldPlayerX][(int)img->player.y] == 1)
+        {
+            // Undo the rotation if there is a wall
+            img->player.dir_x = oldDirX;
+            img->player.dir_y = oldDirY;
+            img->player.plane_x = oldPlaneX;
+            img->player.plane_y = oldPlaneY;
+        }
+    }
+
+    // Continue with rendering logic
     memset(img->addr, 0, WIDTH * HEIGHT * (img->bits_per_pixel / 8));
-
-    // Cast rays and render the frame
     cast_rays(img);
-
-    // Update the image
     update_image(img);
 
     return (0);
 }
 
-int	main()
+
+int render_frame(t_data *img)
 {
-   t_data      img;
+    memset(img->addr, 0, WIDTH * HEIGHT * (img->bits_per_pixel / 8));
+
+    cast_rays(img);
+	
+    update_image(img);
+	key_hook(&img->keys);
+	
+    return (0);
+}
+
+int main()
+{
+    t_data img;
+    t_keys keys = {0};
 
     img.mlx = mlx_init();
     img.mlx_win = mlx_new_window(img.mlx, WIDTH, HEIGHT, "Raycasting Demo");
     img.img = mlx_new_image(img.mlx, WIDTH, HEIGHT);
     img.addr = mlx_get_data_addr(img.img, &img.bits_per_pixel, &img.line_length, &img.endian);
+    keys.img = &img;
 
-   img.player.x = 22.0;
-   img.player.y = 11.5;
-   img.player.dir_x = 0.0;
-   img.player.dir_y = -1.0;
-   img.player.plane_x = 1.0;
-   img.player.plane_y = 0.00;
-    
+    img.player.x = 22.0;
+    img.player.y = 12;
+    img.player.dir_x = -1.0;
+    img.player.dir_y = 0.0;
+    img.player.plane_x = 0.0;
+    img.player.plane_y = 0.66;
+
     mlx_hook(img.mlx_win, 17, 0, close_program, &img);
-    mlx_hook(img.mlx_win, 2, 1L << 0, key_hook, &img);
+    mlx_hook(img.mlx_win, 2, 1L << 0, key_press, &keys);
+    mlx_hook(img.mlx_win, 3, 1L << 1, key_release, &keys);
 
-    mlx_loop_hook(img.mlx, (void *)render_frame, &img);
+    mlx_loop_hook(img.mlx, (void *)key_hook, &keys); // Hook the key_hook function
+
     mlx_loop(img.mlx);
 
     return (0);
