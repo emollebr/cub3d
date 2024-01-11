@@ -108,7 +108,7 @@ void cast_rays(t_data *img)
                 ray.side = 1;
             }
 
-            if (worldMap[ray.map_x][ray.map_y] == 1)
+            if (img->worldMap[ray.map_x][ray.map_y] == 1)
                 ray.hit = 1;
         }
 
@@ -142,17 +142,17 @@ void cast_rays(t_data *img)
 
 int key_press(int keycode, t_keys *keys)
 {
-    if (keycode == 13) // W key
+    if (keycode == 119) // W key
         keys->w = true;
-    if (keycode == 1)  // S key
+    if (keycode == 115)  // S key
         keys->s = true;
-    if (keycode == 0)  // A key
+    if (keycode == 97)  // A key
         keys->a = true;
-    if (keycode == 2)  // D key
+    if (keycode == 100)  // D key
         keys->d = true;
-    if (keycode == 123) // Left arrow key
+    if (keycode == 65361) // Left arrow key
         keys->left = true;
-    if (keycode == 124) // Right arrow key
+    if (keycode == 65363) // Right arrow key
         keys->right = true;
 
     return (0);
@@ -160,25 +160,26 @@ int key_press(int keycode, t_keys *keys)
 
 int key_release(int keycode, t_keys *keys)
 {
-    if (keycode == 13) // W key
+    if (keycode == 119) // W key
         keys->w = false;
-    if (keycode == 1)  // S key
+    if (keycode == 115)  // S key
         keys->s = false;
-    if (keycode == 0)  // A key
+    if (keycode == 97)  // A key
         keys->a = false;
-    if (keycode == 2)  // D key
+    if (keycode == 100)  // D key
         keys->d = false;
-    if (keycode == 123) // Left arrow key
+    if (keycode == 65361) // Left arrow key
         keys->left = false;
-    if (keycode == 124) // Right arrow key
+    if (keycode == 65363) // Right arrow key
         keys->right = false;
 
     return (0);
 }
-int key_hook(t_keys *keys)
+int key_hook(t_data *img)
 {
-    t_data *img = keys->img; // Assuming keys->img holds a reference to your t_data structure
+    t_keys  *keys;
 
+    keys = &img->keys;
     double oldPlayerX = img->player.x;
     double oldPlayerY = img->player.y;
     // Handle key presses
@@ -202,25 +203,23 @@ int key_hook(t_keys *keys)
         img->player.x += img->player.plane_x * MOV_SPEED;
         img->player.y += img->player.plane_y * MOV_SPEED;
     }
-
 	    // Check for collisions with walls
-    if (worldMap[(int)img->player.x][(int)oldPlayerY] == 1)
+    if (img->worldMap[(int)oldPlayerY][(int)img->player.x] == 1)
     {
         // Undo the player's movement if there is a wall in the new X position
         img->player.x = oldPlayerX;
     }
-    if (worldMap[(int)oldPlayerX][(int)img->player.y] == 1)
+    if (img->worldMap[(int)img->player.y][(int)oldPlayerX] == 1)
     {
         // Undo the player's movement if there is a wall in the new Y position
         img->player.y = oldPlayerY;
     }
 
-    double oldDirY = img->player.dir_y;  // Add this line
+    double oldDirY = img->player.dir_y;
     double oldPlaneY = img->player.plane_y;
-	
-    if (keys->left)
+    if (keys->right)
     {
-        // Handle rotation to the left
+        // Handle rotation to the right
         double oldDirX = img->player.dir_x;
         img->player.dir_x = img->player.dir_x * cos(-ROT_SPEED) - img->player.dir_y * sin(-ROT_SPEED);
         img->player.dir_y = oldDirX * sin(-ROT_SPEED) + img->player.dir_y * cos(-ROT_SPEED);
@@ -229,7 +228,7 @@ int key_hook(t_keys *keys)
         img->player.plane_x = img->player.plane_x * cos(-ROT_SPEED) - img->player.plane_y * sin(-ROT_SPEED);
         img->player.plane_y = oldPlaneX * sin(-ROT_SPEED) + img->player.plane_y * cos(-ROT_SPEED);
 		        // Check for collisions with walls after rotation
-        if (worldMap[(int)img->player.x][(int)oldPlayerY] == 1 || worldMap[(int)oldPlayerX][(int)img->player.y] == 1)
+        if (img->worldMap[(int)oldPlayerY][(int)img->player.x] == 1 || img->worldMap[(int)img->player.y][(int)oldPlayerX] == 1)
         {
             // Undo the rotation if there is a wall
             img->player.dir_x = oldDirX;
@@ -239,9 +238,9 @@ int key_hook(t_keys *keys)
         }
 
     }
-    if (keys->right)
+    if (keys->left)
     {
-        // Handle rotation to the right
+        // Handle rotation to the left
         double oldDirX = img->player.dir_x;
         img->player.dir_x = img->player.dir_x * cos(ROT_SPEED) - img->player.dir_y * sin(ROT_SPEED);
         img->player.dir_y = oldDirX * sin(ROT_SPEED) + img->player.dir_y * cos(ROT_SPEED);
@@ -250,7 +249,7 @@ int key_hook(t_keys *keys)
         img->player.plane_x = img->player.plane_x * cos(ROT_SPEED) - img->player.plane_y * sin(ROT_SPEED);
         img->player.plane_y = oldPlaneX * sin(ROT_SPEED) + img->player.plane_y * cos(ROT_SPEED);
 		        // Check for collisions with walls after rotation
-        if (worldMap[(int)img->player.x][(int)oldPlayerY] == 1 || worldMap[(int)oldPlayerX][(int)img->player.y] == 1)
+        if (img->worldMap[(int)img->player.x][(int)oldPlayerY] == 1 || img->worldMap[(int)oldPlayerX][(int)img->player.y] == 1)
         {
             // Undo the rotation if there is a wall
             img->player.dir_x = oldDirX;
@@ -276,12 +275,12 @@ int render_frame(t_data *img)
     cast_rays(img);
 	
     update_image(img);
-	key_hook(&img->keys);
+	key_hook(img);
 	
     return (0);
 }
 
-int main()
+int main(int argc, char **argv)
 {
     t_data img;
     t_keys keys = {0};
@@ -292,20 +291,54 @@ int main()
     img.addr = mlx_get_data_addr(img.img, &img.bits_per_pixel, &img.line_length, &img.endian);
     keys.img = &img;
 
-    img.player.x = 22.0;
-    img.player.y = 12;
+
+    if (argc != 2)
+        return (ft_printf("Error: enter valid .cub file as argument\n"), -1);
+
+    img.player.x = 26.0;
+    img.player.y = 11.0;
     img.player.dir_x = -1.0;
     img.player.dir_y = 0.0;
     img.player.plane_x = 0.0;
     img.player.plane_y = 0.66;
-
+    img.textures = malloc(sizeof(t_textures));
+    img.textures->type = NULL;
+    img.textures->path = NULL;
+    parse_cub_file(argv[1], &img);
+    
+    int i = 0;
+    int j = 0;
+    while (i < img.mapHeight)
+    {
+        while (j < img.mapWidth)
+        {
+            ft_printf("%d ", img.worldMap[i][j]);
+            j++;
+        }
+        j = 0;
+        ft_printf("\n");
+        i++;
+    }
     mlx_hook(img.mlx_win, 17, 0, close_program, &img);
     mlx_hook(img.mlx_win, 2, 1L << 0, key_press, &keys);
     mlx_hook(img.mlx_win, 3, 1L << 1, key_release, &keys);
-
-    mlx_loop_hook(img.mlx, (void *)key_hook, &keys); // Hook the key_hook function
+    mlx_loop_hook(img.mlx, (void *)key_hook, &img); // Hook the key_hook function
 
     mlx_loop(img.mlx);
 
+    while (img.textures != NULL) {
+    free(img.textures->type);
+    free(img.textures->path);
+    img.textures = img.textures->next;
+    }
+    free(img.textures);
+    //free map
+    i = 0;
+    while (i < img.mapHeight)
+    {
+        free(img.worldMap[i]);
+        i++;
+    }
+    free(img.worldMap);
     return (0);
 }

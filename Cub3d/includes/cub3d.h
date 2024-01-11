@@ -14,7 +14,7 @@
 # define CUB3D_H
 
 # include "../minilibx-linux/mlx.h"
-#include "cub3d.h"
+#include "../libft/my_lib.h"
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
@@ -22,6 +22,13 @@
 
 # define ROT_SPEED 0.05
 # define MOV_SPEED 0.2
+
+typedef struct s_textures
+{
+    char *type;
+    char *path;
+    struct s_textures *next;
+} t_textures;
 
 typedef struct images
 {
@@ -73,6 +80,10 @@ typedef struct s_data {
 	double	jy;
   t_player  player;
   t_keys	keys;
+  t_textures  *textures;
+  int   **worldMap;
+  int   mapHeight;
+  int   mapWidth;
 }	t_data;
 
 
@@ -93,14 +104,11 @@ typedef struct s_ray {
     int     side;
 }               t_ray;
 
-#define mapWidth 24
-#define mapHeight 24
 #define WIDTH 1024
 #define HEIGHT 720
 
 
-
-int worldMap[mapWidth][mapHeight]=
+/*int worldMap[mapWidth][mapHeight]=
 {
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
@@ -126,6 +134,12 @@ int worldMap[mapWidth][mapHeight]=
   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-};
+};*/
+
+int   parse_cub_file(const char *filename, t_data *img);
+int    parse_textures(int file, t_data *img);
+char    *get_map_dimensions(int file, t_data *img);
+void    parse_map(int file, char *start_of_map, t_data *img);
+
 
 #endif

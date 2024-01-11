@@ -12,21 +12,24 @@
 
 CC = cc 
 CFLAGS = -Wall -Wextra -Werror
-CFILES = main.c
+CFILES = main.c parse_cub_file.c parse_map.c parse_textures.c
 OFILES = $(CFILES:.c=.o)
 NAME = cub3d
 SRC = sources
 LIB = cub3d.a
 HPATH = includes
-MLXFLAGS = -I ./includes/ -I ./minilibx-linux -lXext -lX11 -lm
+MLXFLAGS = -I ./includes/ -I ./minilibx-linux -I ./libft -lXext -lX11 -lm
 MLX_PATH	= minilibx-linux/
 MLX_NAME	= libmlx.a
+LIBFT_PATH	= libft/
+LIBFT_NAME	= libft.a
 MLX			= $(MLX_PATH)$(MLX_NAME)
+LIBFT		= $(LIBFT_PATH)$(LIBFT_NAME)
 
 all : $(NAME)
 
 $(NAME) : $(OFILES)
-	@${CC} $^ -o $@ $(MLX) ${MLXFLAGS}
+	@${CC} $^ -o $@ $(MLX) $(LIBFT) ${MLXFLAGS}
 	@ar -r $(LIB) $(OFILES)
 
 $(SRC)/%.o: $(SRC)/%.c $(HPATH)/%.h
