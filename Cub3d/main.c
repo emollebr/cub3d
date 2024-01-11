@@ -92,7 +92,7 @@ void cast_rays(t_data *img)
             ray.step_y = 1;
             ray.side_dist_y = (ray.map_y + 1.0 - img->player.y) * ray.delta_dist_y;
         }
-
+        ray.hit = 0;
         while (ray.hit == 0)
         {
             if (ray.side_dist_x < ray.side_dist_y)
@@ -304,21 +304,15 @@ int main(int argc, char **argv)
     img.textures = malloc(sizeof(t_textures));
     img.textures->type = NULL;
     img.textures->path = NULL;
+    img.keys.w = false;
+    img.keys.s = false;
+    img.keys.a = false;
+    img.keys.d = false;
+    img.keys.left = false;
+    img.keys.right = false;
+
     parse_cub_file(argv[1], &img);
     
-    int i = 0;
-    int j = 0;
-    while (i < img.mapHeight)
-    {
-        while (j < img.mapWidth)
-        {
-            ft_printf("%d ", img.worldMap[i][j]);
-            j++;
-        }
-        j = 0;
-        ft_printf("\n");
-        i++;
-    }
     mlx_hook(img.mlx_win, 17, 0, close_program, &img);
     mlx_hook(img.mlx_win, 2, 1L << 0, key_press, &keys);
     mlx_hook(img.mlx_win, 3, 1L << 1, key_release, &keys);
@@ -326,14 +320,14 @@ int main(int argc, char **argv)
 
     mlx_loop(img.mlx);
 
+    //freeing
     while (img.textures != NULL) {
-    free(img.textures->type);
-    free(img.textures->path);
-    img.textures = img.textures->next;
+        free(img.textures->type);
+        free(img.textures->path);
+        img.textures = img.textures->next;
     }
     free(img.textures);
-    //free map
-    i = 0;
+    int i = 0;
     while (i < img.mapHeight)
     {
         free(img.worldMap[i]);

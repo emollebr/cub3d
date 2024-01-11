@@ -11,7 +11,7 @@
 # **************************************************************************** #
 
 CC = cc 
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -g -Wall -Wextra -Werror
 CFILES = main.c parse_cub_file.c parse_map.c parse_textures.c
 OFILES = $(CFILES:.c=.o)
 NAME = cub3d
