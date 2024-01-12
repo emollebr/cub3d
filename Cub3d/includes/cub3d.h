@@ -6,14 +6,14 @@
 /*   By: levijimenezrufes <levijimenezrufes@stud    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 17:16:37 by lejimene          #+#    #+#             */
-/*   Updated: 2024/01/10 16:44:29 by levijimenez      ###   ########.fr       */
+/*   Updated: 2024/01/12 13:11:47 by levijimenez      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CUB3D_H
 # define CUB3D_H
 
-# include "../minilibx-linux/mlx.h"
+# include "../minilibx_macos/mlx.h"
 #include "../libft/my_lib.h"
 #include <string.h>
 #include <stdio.h>

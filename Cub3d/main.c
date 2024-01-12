@@ -6,7 +6,7 @@
 /*   By: levijimenezrufes <levijimenezrufes@stud    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/07 17:15:39 by lejimene          #+#    #+#             */
-/*   Updated: 2024/01/10 16:41:12 by levijimenez      ###   ########.fr       */
+/*   Updated: 2024/01/12 13:31:17 by levijimenez      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -142,17 +142,17 @@ void cast_rays(t_data *img)
 
 int key_press(int keycode, t_keys *keys)
 {
-    if (keycode == 119) // W key
+    if (keycode == 13) // W key
         keys->w = true;
-    if (keycode == 115)  // S key
+    if (keycode == 1)  // S key
         keys->s = true;
-    if (keycode == 97)  // A key
+    if (keycode == 0)  // A key
         keys->a = true;
-    if (keycode == 100)  // D key
+    if (keycode == 2)  // D key
         keys->d = true;
-    if (keycode == 65361) // Left arrow key
+    if (keycode == 123) // Left arrow key
         keys->left = true;
-    if (keycode == 65363) // Right arrow key
+    if (keycode == 124) // Right arrow key
         keys->right = true;
 
     return (0);
@@ -160,17 +160,17 @@ int key_press(int keycode, t_keys *keys)
 
 int key_release(int keycode, t_keys *keys)
 {
-    if (keycode == 119) // W key
+    if (keycode == 13) // W key
         keys->w = false;
-    if (keycode == 115)  // S key
+    if (keycode == 1)  // S key
         keys->s = false;
-    if (keycode == 97)  // A key
+    if (keycode == 0)  // A key
         keys->a = false;
-    if (keycode == 100)  // D key
+    if (keycode == 2)  // D key
         keys->d = false;
-    if (keycode == 65361) // Left arrow key
+    if (keycode == 123) // Left arrow key
         keys->left = false;
-    if (keycode == 65363) // Right arrow key
+    if (keycode == 124) // Right arrow key
         keys->right = false;
 
     return (0);
@@ -185,6 +185,7 @@ int key_hook(t_data *img)
     // Handle key presses
     if (keys->w)
     {
+		printf("whaatttttt\n\n\n\n\n");
         img->player.x += img->player.dir_x * MOV_SPEED;
         img->player.y += img->player.dir_y * MOV_SPEED;
     }
@@ -258,6 +259,8 @@ int key_hook(t_data *img)
             img->player.plane_y = oldPlaneY;
         }
     }
+	printf ("player x : %f\n", img->player.x);
+	printf ("player y : %f\n", img->player.y);
 
     // Continue with rendering logic
     memset(img->addr, 0, WIDTH * HEIGHT * (img->bits_per_pixel / 8));
@@ -304,18 +307,11 @@ int main(int argc, char **argv)
     img.textures = malloc(sizeof(t_textures));
     img.textures->type = NULL;
     img.textures->path = NULL;
-    img.keys.w = false;
-    img.keys.s = false;
-    img.keys.a = false;
-    img.keys.d = false;
-    img.keys.left = false;
-    img.keys.right = false;
-
     parse_cub_file(argv[1], &img);
     
     mlx_hook(img.mlx_win, 17, 0, close_program, &img);
-    mlx_hook(img.mlx_win, 2, 1L << 0, key_press, &keys);
-    mlx_hook(img.mlx_win, 3, 1L << 1, key_release, &keys);
+    mlx_hook(img.mlx_win, 2, 1L << 0, key_press, &img.keys);
+    mlx_hook(img.mlx_win, 3, 1L << 1, key_release, &img.keys);
     mlx_loop_hook(img.mlx, (void *)key_hook, &img); // Hook the key_hook function
 
     mlx_loop(img.mlx);

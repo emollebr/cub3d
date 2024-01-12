@@ -151,6 +151,16 @@ int    parseAndValidateMap(int file, char *start_of_map, t_data *img)
         ft_printf("Error: Map is not surrounded by walls.\n");
        return (-1);
     }
+	    // Print the parsed map for debugging
+    printf("Parsed Map:\n");
+    for (int i = 0; i < img->mapHeight; i++)
+    {
+        for (int j = 0; j < img->mapWidth; j++)
+        {
+            printf("%d ", img->worldMap[i][j]);
+        }
+        printf("\n");
+    }
     return (0);
 }
 
