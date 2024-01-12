@@ -127,8 +127,10 @@ int    parseAndValidateMap(int file, char *start_of_map, t_data *img)
                 img->worldMap[row][col] = 3;
             else if (ft_isalpha(c)) {
                 img->worldMap[row][col] = 0;
-                img->player.x = col;
+                img->player.x = col + 1;
                 img->player.y = row;
+                	printf ("player x1 : %f\n", img->player.x);
+	printf ("player y1 : %f\n", img->player.y);
                 //put direction here as well
             } 
             else

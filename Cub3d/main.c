@@ -107,7 +107,7 @@ void cast_rays(t_data *img)
                 ray.map_y += ray.step_y;
                 ray.side = 1;
             }
-
+            printf("%d\n", img->worldMap[ray.map_x][ray.map_y]);
             if (img->worldMap[ray.map_x][ray.map_y] == 1)
                 ray.hit = 1;
         }
@@ -142,17 +142,17 @@ void cast_rays(t_data *img)
 
 int key_press(int keycode, t_keys *keys)
 {
-    if (keycode == 13) // W key
+   if (keycode == 119) // W key
         keys->w = true;
-    if (keycode == 1)  // S key
+    if (keycode == 115)  // S key
         keys->s = true;
-    if (keycode == 0)  // A key
+    if (keycode == 97)  // A key
         keys->a = true;
-    if (keycode == 2)  // D key
+    if (keycode == 100)  // D key
         keys->d = true;
-    if (keycode == 123) // Left arrow key
+    if (keycode == 65361) // Left arrow key
         keys->left = true;
-    if (keycode == 124) // Right arrow key
+    if (keycode == 65363) // Right arrow key
         keys->right = true;
 
     return (0);
@@ -160,17 +160,17 @@ int key_press(int keycode, t_keys *keys)
 
 int key_release(int keycode, t_keys *keys)
 {
-    if (keycode == 13) // W key
+    if (keycode == 119) // W key
         keys->w = false;
-    if (keycode == 1)  // S key
+    if (keycode == 115)  // S key
         keys->s = false;
-    if (keycode == 0)  // A key
+    if (keycode == 97)  // A key
         keys->a = false;
-    if (keycode == 2)  // D key
+    if (keycode == 100)  // D key
         keys->d = false;
-    if (keycode == 123) // Left arrow key
+    if (keycode == 65361) // Left arrow key
         keys->left = false;
-    if (keycode == 124) // Right arrow key
+    if (keycode == 65363) // Right arrow key
         keys->right = false;
 
     return (0);
@@ -205,7 +205,7 @@ int key_hook(t_data *img)
         img->player.y += img->player.plane_y * MOV_SPEED;
     }
 	    // Check for collisions with walls
-    if (img->worldMap[(int)oldPlayerY][(int)img->player.x] == 1)
+    if (img->worldMap[(int)oldPlayerY][(int)img->player.x] == 1 || img->worldMap[(int)oldPlayerY][(int)img->player.x] == 3)
     {
         // Undo the player's movement if there is a wall in the new X position
         img->player.x = oldPlayerX;
@@ -259,8 +259,8 @@ int key_hook(t_data *img)
             img->player.plane_y = oldPlaneY;
         }
     }
-	printf ("player x : %f\n", img->player.x);
-	printf ("player y : %f\n", img->player.y);
+	//printf ("player x : %f\n", img->player.x);
+	//printf ("player y : %f\n", img->player.y);
 
     // Continue with rendering logic
     memset(img->addr, 0, WIDTH * HEIGHT * (img->bits_per_pixel / 8));
@@ -286,13 +286,13 @@ int render_frame(t_data *img)
 int main(int argc, char **argv)
 {
     t_data img;
-    t_keys keys = {0};
+   //t_keys keys = {0};
 
     img.mlx = mlx_init();
     img.mlx_win = mlx_new_window(img.mlx, WIDTH, HEIGHT, "Raycasting Demo");
     img.img = mlx_new_image(img.mlx, WIDTH, HEIGHT);
     img.addr = mlx_get_data_addr(img.img, &img.bits_per_pixel, &img.line_length, &img.endian);
-    keys.img = &img;
+   //keys.img = &img;
 
 
     if (argc != 2)
@@ -306,9 +306,17 @@ int main(int argc, char **argv)
     img.player.plane_y = 0.66;
     img.textures = malloc(sizeof(t_textures));
     img.textures->type = NULL;
+    img.keys.w = false;
+    img.keys.s = false;
+    img.keys.a = false;
+    img.keys.d = false;
+    img.keys.left = false;
+    img.keys.right = false;
+        
     img.textures->path = NULL;
     parse_cub_file(argv[1], &img);
     
+
     mlx_hook(img.mlx_win, 17, 0, close_program, &img);
     mlx_hook(img.mlx_win, 2, 1L << 0, key_press, &img.keys);
     mlx_hook(img.mlx_win, 3, 1L << 1, key_release, &img.keys);
