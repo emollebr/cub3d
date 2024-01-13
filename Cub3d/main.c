@@ -270,6 +270,37 @@ int key_hook(t_data *img)
     return (0);
 }
 
+void render_minimap(t_data *img)
+{
+    int tile_size = 5;
+    int scale_factor = 10;
+
+    // Draw the game world on the minimap
+    for (int i = 0; i < img->mapWidth; i++)
+    {
+        for (int j = 0; j < img->mapHeight; j++)
+        {
+            int color = (img->worldMap[i][j] == 1) ? 0xFFFFFF : 0x000000;
+
+            for (int x = 0; x < tile_size; x++)
+            {
+                for (int y = 0; y < tile_size; y++)
+                {
+                    int pixel_x = i * tile_size * scale_factor + x * scale_factor;
+                    int pixel_y = j * tile_size * scale_factor + y * scale_factor;
+
+                    my_mlx_pixel_put(img, pixel_x, pixel_y, color);
+                }
+            }
+        }
+    }
+
+    // Draw the player position using the loaded image
+    int player_x = floor(img->player.x * scale_factor);
+    int player_y = floor(img->player.y * scale_factor);
+
+    mlx_put_image_to_window(img->mlx, img->mlx_win, img->player_img, player_x, player_y);
+}
 
 int render_frame(t_data *img)
 {
@@ -279,6 +310,7 @@ int render_frame(t_data *img)
 	
     update_image(img);
 	key_hook(img);
+    render_minimap(img);
 	
     return (0);
 }
@@ -315,7 +347,6 @@ int main(int argc, char **argv)
         
     img.textures->path = NULL;
     parse_cub_file(argv[1], &img);
-    
 
     mlx_hook(img.mlx_win, 17, 0, close_program, &img);
     mlx_hook(img.mlx_win, 2, 1L << 0, key_press, &img.keys);

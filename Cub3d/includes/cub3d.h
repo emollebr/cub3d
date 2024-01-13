@@ -84,6 +84,7 @@ typedef struct s_data {
   int   **worldMap;
   int   mapHeight;
   int   mapWidth;
+  void	*player_img;
 }	t_data;
 
 
