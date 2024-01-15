@@ -22,6 +22,7 @@
 
 # define ROT_SPEED 0.05
 # define MOV_SPEED 0.2
+# define MIN_DISTANCE_FROM_WALL 0.2
 
 typedef struct images
 {

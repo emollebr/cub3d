@@ -93,9 +93,10 @@ void update_image(t_data *img, t_keys *keys)
     else
         overlay_img2 = mlx_xpm_file_to_image(img->mlx, relative_path2, &img_width, &img_height);
 
+    void *overlay_img = mlx_xpm_file_to_image(img->mlx, relative_path, &img_width, &img_height);
+
     img->player.old_player_x = img->player.x;
     img->player.old_player_y = img->player.y;
-    void *overlay_img = mlx_xpm_file_to_image(img->mlx, relative_path, &img_width, &img_height);
 
     if (overlay_img != NULL && overlay_img2 != NULL)
     {
@@ -104,7 +105,10 @@ void update_image(t_data *img, t_keys *keys)
         // Draw overlay images onto the window
         draw_overlay_image(img, overlay_img2, img_width, img_height, 0, 0);
         draw_overlay_image(img, overlay_img, img_width, img_height, 0, 0);
+
         mlx_do_sync(img->mlx);
+       mlx_destroy_image(img->mlx, overlay_img2);
+        //mlx_destroy_image(img->mlx, overlay_img);
     }
     else
     {
