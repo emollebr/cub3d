@@ -316,7 +316,7 @@ void cast_rays(t_data *img)
                 ray.side = 1;
             }
 
-            if (worldMap[ray.map_x][ray.map_y] == 1)
+            if (img->worldMap[ray.map_x][ray.map_y] == 1)
                 ray.hit = 1;
         }
 
@@ -405,12 +405,12 @@ int key_hook(t_keys *keys)
     }
 
 	    // Check for collisions with walls
-    if (worldMap[(int)img->player.x][(int)oldPlayerY] == 1)
+    if (img->worldMap[(int)img->player.x][(int)oldPlayerY] == 1)
     {
         // Undo the player's movement if there is a wall in the new X position
         img->player.x = oldPlayerX;
     }
-    if (worldMap[(int)oldPlayerX][(int)img->player.y] == 1)
+    if (img->worldMap[(int)oldPlayerX][(int)img->player.y] == 1)
     {
         // Undo the player's movement if there is a wall in the new Y position
         img->player.y = oldPlayerY;
@@ -430,7 +430,7 @@ int key_hook(t_keys *keys)
         img->player.plane_x = img->player.plane_x * cos(-ROT_SPEED) - img->player.plane_y * sin(-ROT_SPEED);
         img->player.plane_y = oldPlaneX * sin(-ROT_SPEED) + img->player.plane_y * cos(-ROT_SPEED);
 		        // Check for collisions with walls after rotation
-        if (worldMap[(int)img->player.x][(int)oldPlayerY] == 1 || worldMap[(int)oldPlayerX][(int)img->player.y] == 1)
+        if (img->worldMap[(int)img->player.x][(int)oldPlayerY] == 1 || img->worldMap[(int)oldPlayerX][(int)img->player.y] == 1)
         {
             // Undo the rotation if there is a wall
             img->player.dir_x = oldDirX;
@@ -451,7 +451,7 @@ int key_hook(t_keys *keys)
         img->player.plane_x = img->player.plane_x * cos(ROT_SPEED) - img->player.plane_y * sin(ROT_SPEED);
         img->player.plane_y = oldPlaneX * sin(ROT_SPEED) + img->player.plane_y * cos(ROT_SPEED);
 		        // Check for collisions with walls after rotation
-        if (worldMap[(int)img->player.x][(int)oldPlayerY] == 1 || worldMap[(int)oldPlayerX][(int)img->player.y] == 1)
+        if (img->worldMap[(int)img->player.x][(int)oldPlayerY] == 1 || img->worldMap[(int)oldPlayerX][(int)img->player.y] == 1)
         {
             // Undo the rotation if there is a wall
             img->player.dir_x = oldDirX;
@@ -468,21 +468,55 @@ int key_hook(t_keys *keys)
 
     return (0);
 }
+void render_minimap(t_data *img)
+{
+    int minimap_x = 10;  // Adjust these values for the minimap position
+    int minimap_y = 10;
+    int minimap_width = 100;  // Adjust these values for the minimap size
+    int minimap_height = 100;
 
+    // Draw a rectangle for the minimap background
+    for (int y = minimap_y; y < minimap_y + minimap_height; ++y)
+    {
+        for (int x = minimap_x; x < minimap_x + minimap_width; ++x)
+        {
+            my_mlx_pixel_put(img, x, y, 0xFF0000);  // Red color as the background for the minimap
+        }
+    }
 
+    // Load the minimap image onto the minimap background
+    for (int y = 0; y < img->minimap_img_height; ++y)
+    {
+        for (int x = 0; x < img->minimap_img_width; ++x)
+        {
+            int color = *(unsigned int *)(img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8)));
+            
+            if ((color & 0x00FFFFFF) != 0)  // Check if the pixel is not fully transparent
+            {
+                int img_x = minimap_x + x;  // Adjust the coordinates based on your preference
+                int img_y = minimap_y + y;
+                my_mlx_pixel_put(img, img_x, img_y, color);
+            }
+        }
+    }
+}
+
+// Update the render_frame function to include the minimap
 int render_frame(t_data *img)
 {
     memset(img->addr, 0, WIDTH * HEIGHT * (img->bits_per_pixel / 8));
 
     cast_rays(img);
-	
+    render_minimap(img);  // Render the minimap
+
     update_image(img, &img->keys);
-	key_hook(&img->keys);
-	
+    key_hook(&img->keys);
+
+
     return (0);
 }
 
-int main()
+int main(int argc, char **argv)
 {
     t_data img;
     t_keys keys = {0};
@@ -493,22 +527,37 @@ int main()
     img.addr = mlx_get_data_addr(img.img, &img.bits_per_pixel, &img.line_length, &img.endian);
     keys.img = &img;
 
-	load_textures(&img);
+    // Load textures, including the minimap image
+    load_textures(&img);
+    img.minimap_img = mlx_xpm_file_to_image(img.mlx, "./images/3.xpm", &img.minimap_img_width, &img.minimap_img_height);
+    if (img.minimap_img == NULL)
+    {
+        fprintf(stderr, "Error loading minimap image.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Set player and other initializations
     img.player.x = 22.0;
     img.player.y = 12;
     img.player.dir_x = -1.0;
     img.player.dir_y = 0.0;
     img.player.plane_x = 0.0;
     img.player.plane_y = 0.66;
-	img.player.old_player_x = img.player.x;
-	img.player.old_player_y = img.player.y;
+    img.player.old_player_x = img.player.x;
+    img.player.old_player_y = img.player.y;
 
+    // Parse the .cub file
+    if (argc != 2)
+        ft_printf("Enter .cub file as argument\n");
+    parse_cub_file(argv[1], &img);
+
+    // Set up event hooks
     mlx_hook(img.mlx_win, 17, 0, close_program, &img);
     mlx_hook(img.mlx_win, 2, 1L << 0, key_press, &keys);
     mlx_hook(img.mlx_win, 3, 1L << 1, key_release, &keys);
+    mlx_loop_hook(img.mlx, (void *)key_hook, &keys);
 
-    mlx_loop_hook(img.mlx, (void *)key_hook, &keys); // Hook the key_hook function
-
+    // Start the main loop
     mlx_loop(img.mlx);
 
     return (0);
