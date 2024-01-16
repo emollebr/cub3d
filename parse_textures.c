@@ -1,16 +1,15 @@
 #include "includes/cub3d.h"
 
 void    copy_texture_element(t_tex *element, char *line) {
-    ft_printf("line: %s\n", line);
-    if (line[0] == 'F' || line[0] == 'C') {
-        // Floor/ceiling color
-        element->type = ft_substr(line, 0, 1);
-       element->path = ft_substr(line, 2, ft_strlen(line) - 2);
-    } else {
-        // NSEW color
-        element->type = ft_substr(line, 0, 2);
-       element->path = ft_substr(line, 3, ft_strlen(line ) - 3);
-    }
+    int i;
+
+    i = 0;
+    while (line[i] != ' ')
+        i++;
+    element->type = ft_substr(line, 0, i);
+    while (line[i] == ' ')
+        i++;
+    element->path = ft_substr(line, i, ft_strlen(line) - 2);
     ft_printf("type: %s, path: %s\n", element->type, element->path);
     return ;
 }

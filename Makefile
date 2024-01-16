@@ -12,7 +12,7 @@
 
 CC = gcc
 CFLAGS = -g -Wall -Wextra -Werror -fPIE
-CFILES = main.c parse_cub_file.c parse_map.c parse_textures.c
+CFILES = main.c parse_cub_file.c parse_map.c utils_parse_map.c parse_textures.c minimap.c
 OFILES = $(CFILES:.c=.o)
 NAME = cub3d
 SRC = sources

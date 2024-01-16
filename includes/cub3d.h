@@ -141,10 +141,21 @@ typedef struct s_ray
     double floor_y_step;
 } t_ray;
 
-int parse_cub_file(const char *filename, t_data *img);
-void    parse_map(int file, char *start_of_map, t_data *img);
+void    my_mlx_pixel_put(t_data *img, int x, int y, int color);
+void    free_all(t_data *img);
+
+int     parse_cub_file(const char *filename, t_data *img);
+
+int     parse_map(int file, char *start_of_map, t_data *img);
+
+//map utils
+int     is_valid_map_char(char c);
+int     validate_map(t_data *img);
 char    *get_map_dimensions(int file, t_data *img);
-int    parse_textures(int file, t_data *img);
+
+int     parse_textures(int file, t_data *img);
+
+void    render_minimap(t_data *img);
 
 # define WIDTH 1024
 # define HEIGHT 720

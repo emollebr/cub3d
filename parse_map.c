@@ -1,57 +1,30 @@
 #include "includes/cub3d.h"
 
-char    *get_map_dimensions(int file, t_data *img)
+void    parse_player_pos(t_data *img, char dir, int row, int col)
 {
-    char    *start_of_map;
-    char    *line;
-    int     current_width;
-
-    img->mapWidth = 0;
-   img->mapHeight = 1;
-    line = get_next_line(file);
-    while (line[0] == '\n')
-    {
-        free(line);
-        line = get_next_line(file);
+    img->worldMap[row][col] = 0;
+    img->player.x = col;
+    img->player.y = row;
+    if (dir == 'N') {
+        img->player.dir_x = 0.0;
+        img->player.dir_y = -1.0;
     }
-    start_of_map = get_next_line(file);
-    while (line != NULL)
-    {
-        current_width = ft_strlen(line) - 1;
-        if (current_width > img->mapWidth)
-            img->mapWidth = current_width;
-        img->mapHeight++;
-        free(line);
-        line = get_next_line(file);
+    if (dir == 'S') {
+        img->player.dir_x = 0.0;
+        img->player.dir_y = 1.0;
     }
-    free(line);
-    return (start_of_map);
+    if (dir == 'E'){
+        img->player.dir_x = 1.0;
+        img->player.dir_y = 0.0;
+    }
+    if (dir == 'W') {
+        img->player.dir_x = -1.0;
+        img->player.dir_y = 0.0;
+    }
+    return ;
 }
 
-int isValidMapChar(char c)
-{
-    return (c == '0' || c == '1' || c == 'N' || c == 'S' || c == 'E' || c == 'W' || c == ' ');
-}
-
-int validateMap(t_data *img)
-{
-    int i;
-
-    i = -1;
-    // Check if the map is surrounded by walls
-   while (++i < img->mapHeight) 
-   {
-        if (img->worldMap[i][0] != 1 && img->worldMap[i][0] != 3 && img->worldMap[i][img->mapWidth - 1] != 1 && img->worldMap[i][img->mapWidth - 1] != 3)
-            return (0);
-        if (img->worldMap[0][i] != 1 && img->worldMap[img->mapHeight - 1][i] != 1 && img->worldMap[0][i] != 3 && img->worldMap[img->mapHeight - 1][i] != 3)
-           return (0); 
-    }
-    return 1;
-}
-
-// Function to parse and validate the map from a file
-int    parseAndValidateMap(int file, char *start_of_map, t_data *img) 
-{
+char    *allocate_map(int file, char *start_of_map, t_data *img) {
     char *line;
     int i;
 
@@ -59,15 +32,27 @@ int    parseAndValidateMap(int file, char *start_of_map, t_data *img)
     img->worldMap = ft_calloc(sizeof(int *), img->mapHeight);
     while (++i < img->mapHeight)
         img->worldMap[i] = ft_calloc(sizeof(int), img->mapWidth);
-    // Read and parse the map
-    int row = 0;
-    int prevRowLength = 0;
     line = get_next_line(file);
     while (ft_strncmp(start_of_map, line, ft_strlen(line) != 0)) {
         free(line);
         line = get_next_line(file);
     }
     free(start_of_map);
+    return (line);
+}
+
+// Function to parse and validate the map from a file
+int    parse_map(int file, char *start_of_map, t_data *img) 
+{
+    char *line;
+    int row;
+    int col;
+    int prevRowLength;
+
+    line = allocate_map(file, start_of_map, img);
+    // Read and parse the map
+    row = 0;
+    prevRowLength = 0;
     while (line != NULL) {
         if (row >= img->mapHeight) {
             ft_printf("Error: Map size exceeds allowed height.\n");
@@ -75,7 +60,7 @@ int    parseAndValidateMap(int file, char *start_of_map, t_data *img)
         }
 
         // Ignore leading whitespaces
-        int col = 0;
+        col = 0;
         while (line[col] == ' ') {
             img->worldMap[row][col] = 3;
             col++;
@@ -86,7 +71,7 @@ int    parseAndValidateMap(int file, char *start_of_map, t_data *img)
             char c = line[col];
 
             // Check for valid characters
-            if (!isValidMapChar(c)) {
+            if (!is_valid_map_char(c)) {
                 ft_printf("Error: Invalid character '%c' in the map.", c);
                 return (-1);
             }
@@ -125,12 +110,8 @@ int    parseAndValidateMap(int file, char *start_of_map, t_data *img)
             // Assign the character to the worldMap
             if (c == ' ' || c == '\n')
                 img->worldMap[row][col] = 3;
-            else if (ft_isalpha(c)) {
-                img->worldMap[row][col] = 0;
-                img->player.x = col;
-                img->player.y = row;
-                //put direction here as well
-            } 
+            else if (ft_isalpha(c))
+                parse_player_pos(img, c, row, col);
             else
                 img->worldMap[row][col] = c - 48;
             col++;
@@ -146,28 +127,5 @@ int    parseAndValidateMap(int file, char *start_of_map, t_data *img)
         line = get_next_line(file);
     }
     free(line);
-    //Check if the map is surrounded by walls
-    if (!validateMap(img)) {
-        ft_printf("Error: Map is not surrounded by walls.\n");
-       return (-1);
-    }
-	    // Print the parsed map for debugging
-    printf("Parsed Map:\n");
-    for (int i = 0; i < img->mapHeight; i++)
-    {
-        for (int j = 0; j < img->mapWidth; j++)
-        {
-            printf("%d ", img->worldMap[i][j]);
-        }
-        printf("\n");
-    }
     return (0);
-}
-
-void    parse_map(int file, char *start_of_map, t_data *img) 
-{
-
-    parseAndValidateMap(file, start_of_map, img);
-
-    return ;
 }
