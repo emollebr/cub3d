@@ -1,6 +1,6 @@
 #include "includes/cub3d.h"
 
-void    copy_texture_element(t_textures *element, char *line) {
+void    copy_texture_element(t_tex *element, char *line) {
     if (line[0] == 'F' || line[0] == 'C') {
         // Floor color
         element->type = ft_substr(line, 0, 1);
@@ -14,7 +14,7 @@ void    copy_texture_element(t_textures *element, char *line) {
 }
 
 int    parse_textures(int file, t_data *img) {
-    t_textures  *head;
+    t_tex  *head;
     char            *line;
     int             elems;
 
@@ -26,11 +26,11 @@ int    parse_textures(int file, t_data *img) {
         if (ft_strlen(line) != 0 && line[0] != '\n')
         {
             copy_texture_element(img->textures, line);
-            ft_printf("Type: %s, Path: %s\n", img->textures->type, img->textures->path);            // Print or use the parsed information as needed
-            img->textures->next = ft_calloc(sizeof(t_textures), 1);
-            if (!img->textures)
+            ft_printf("Type: %s, Path: %s\n", img->tex->type, img->tex->path);            // Print or use the parsed information as needed
+            img->tex->next = ft_calloc(sizeof(t_tex), 1);
+            if (!img->tex)
                 return (-1);
-            img->textures = img->textures->next;
+            img->tex = img->tex->next;
             elems++;
         }
         free(line);
