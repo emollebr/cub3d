@@ -8,18 +8,26 @@ void    parse_player_pos(t_data *img, char dir, int row, int col)
     if (dir == 'N') {
         img->player.dir_x = 0.0;
         img->player.dir_y = -1.0;
+        img->player.plane_x = 0.66;
+        img->player.plane_y = 0.0;
     }
     if (dir == 'S') {
         img->player.dir_x = 0.0;
         img->player.dir_y = 1.0;
+        img->player.plane_x = -0.66;
+        img->player.plane_y = 0.0;
     }
     if (dir == 'E'){
         img->player.dir_x = 1.0;
         img->player.dir_y = 0.0;
+        img->player.plane_x = 0.0;
+        img->player.plane_y = 0.66;
     }
     if (dir == 'W') {
         img->player.dir_x = -1.0;
         img->player.dir_y = 0.0;
+        img->player.plane_x = 0.0;
+        img->player.plane_y = -0.66;
     }
     return ;
 }

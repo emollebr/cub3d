@@ -145,12 +145,15 @@ t_color apply_light(t_color color, double distance) {
 void load_textures(t_data *img)
 {
     // Load textures into textures array
-    char *texture_paths[5] = {
+    char *texture_paths[7] = {
         "./images/1.xpm",
         "./images/2.xpm",
         "./images/1.xpm",
         "./images/2.xpm",
-		"./images/4.xpm"};
+		"./images/4.xpm",
+        "./images/minimap_walls.xpm",
+        "./images/minimap_background.xpm"
+        };
 
     for (int i = 0; i < 5; i++)
     {
@@ -377,7 +380,6 @@ int key_release(int keycode, t_keys *keys)
 int key_hook(t_keys *keys)
 {
     t_data *img = keys->img; // Assuming keys->img holds a reference to your t_data structure
-
     double oldPlayerX = img->player.x;
     double oldPlayerY = img->player.y;
     // Handle key presses
@@ -515,19 +517,11 @@ int main(int argc, char **argv)
 
     // Load textures, including the minimap image
     load_textures(&img);
-    img.minimap_img = mlx_xpm_file_to_image(img.mlx, "./images/3.xpm", &img.minimap_img_width, &img.minimap_img_height);
-    if (img.minimap_img == NULL)
-    {
-        fprintf(stderr, "Error loading minimap image.\n");
-        exit(EXIT_FAILURE);
-    }
-
+  
     // Parse the .cub file
     if (parse_cub_file(argv[1], &img) == -1)
         return (-1);
     // Set player and other initializations
-    img.player.plane_x = 0.0;
-    img.player.plane_y = 0.66;
     img.player.old_player_x = img.player.x;
     img.player.old_player_y = img.player.y;
     printf("player x: %f, player y: %f\nplayer dir x: %f, player dir y: %f\n, player plane x: %f, player plane y: %f\n", img.player.x, img.player.y, img.player.dir_x, img.player.dir_y, img.player.plane_x, img.player.plane_y);

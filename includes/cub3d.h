@@ -22,8 +22,8 @@
 # include <math.h>
 # include <stdbool.h>
 
-# define ROT_SPEED 0.05
-# define MOV_SPEED 0.2
+# define ROT_SPEED 0.07
+# define MOV_SPEED 0.1
 # define MIN_DISTANCE_FROM_WALL 0.2
 
 typedef struct images
@@ -42,6 +42,15 @@ typedef struct {
     double g;
     double b;
 } t_color;
+
+typedef struct s_minimap {
+    int visible_height;
+    int visible_width;
+    int visible_y;
+    int visible_x;
+    int x;
+    int y;
+} t_minimap;
 
 typedef struct s_keys {
     bool w;
@@ -104,14 +113,12 @@ typedef struct s_data {
 	double	jy;
   t_player  player;
   t_keys	keys;
-  t_texture	textures[5];
+  t_texture	textures[6];
     t_tex *tex;
   int   **worldMap;
   int   mapHeight;
   int   mapWidth;
-  void  *minimap_img;
-  int minimap_img_height;
-  int minimap_img_width;
+  t_texture minimap[2];
 }	t_data;
 
 
@@ -143,6 +150,7 @@ typedef struct s_ray
 
 void    my_mlx_pixel_put(t_data *img, int x, int y, int color);
 void    free_all(t_data *img);
+int     get_texture_color(t_texture texture, int x, int y);
 
 int     parse_cub_file(const char *filename, t_data *img);
 
