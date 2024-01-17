@@ -142,24 +142,28 @@ t_color apply_light(t_color color, double distance) {
     return color;
 }
 
+char    *get_texture_path(t_data *img, char c)
+{
+    t_tex   *tmp;
+
+    tmp = img->tex;
+    while (tmp->type[0] != c)
+        tmp = tmp->next;
+    printf("tex path for %c is '%s'\n", c, tmp->path);
+    return (tmp->path);
+}
+
 void load_textures(t_data *img)
 {
-    // Load textures into textures array
-    char *texture_paths[7] = {
-        "./images/1.xpm",
-        "./images/2.xpm",
-        "./images/1.xpm",
-        "./images/2.xpm",
-		"./images/4.xpm",
-        "./images/minimap_walls.xpm",
-        "./images/minimap_background.xpm"
-        };
+    char *paths;
 
+    paths = ft_strdup("NSWEFC");
     for (int i = 0; i < 5; i++)
     {
-        img->textures[i].img = mlx_xpm_file_to_image(img->mlx, texture_paths[i], &img->textures[i].width, &img->textures[i].height);
+        img->textures[i].img = mlx_xpm_file_to_image(img->mlx, get_texture_path(img, paths[i]), &img->textures[i].width, &img->textures[i].height);
         img->textures[i].addr = mlx_get_data_addr(img->textures[i].img, &img->textures[i].bits_per_pixel, &img->textures[i].line_length, &img->textures[i].endian);
     }
+    free(paths);
 }
 
 void draw_textured_wall(t_data *img, t_ray *ray, int x)
@@ -201,7 +205,6 @@ int get_texture_color(t_texture texture, int x, int y)
 {
     return *(unsigned int *)(texture.addr + (y * texture.line_length + x * (texture.bits_per_pixel / 8)));
 }
-
 
 void draw_textured_floor(t_data *img, int x)
 {
@@ -515,12 +518,10 @@ int main(int argc, char **argv)
     img.addr = mlx_get_data_addr(img.img, &img.bits_per_pixel, &img.line_length, &img.endian);
     keys.img = &img;
 
-    // Load textures, including the minimap image
-    load_textures(&img);
-  
     // Parse the .cub file
     if (parse_cub_file(argv[1], &img) == -1)
         return (-1);
+    load_textures(&img);
     // Set player and other initializations
     img.player.old_player_x = img.player.x;
     img.player.old_player_y = img.player.y;

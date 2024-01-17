@@ -90,6 +90,7 @@ typedef struct s_textures
 {
     char *type;
     char *path;
+    unsigned int   rgb;
     struct s_textures *next;
 } t_tex;
 
