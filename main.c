@@ -147,8 +147,10 @@ char    *get_texture_path(t_data *img, char c)
     t_tex   *tmp;
 
     tmp = img->tex;
-    while (tmp->type[0] != c)
+    while (tmp != NULL && tmp->type[0] != c)
         tmp = tmp->next;
+    if (tmp == NULL)
+        return (NULL);
     printf("tex path for %c is '%s'\n", c, tmp->path);
     return (tmp->path);
 }
