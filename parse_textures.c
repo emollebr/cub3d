@@ -8,7 +8,7 @@ unsigned int rgbToUnsignedInt(char *color)
 
     i = 0;
     j = 0;
-    color = "123,456,789"; // for test only!! delete!!
+    color = "220,700,0"; // for test only!! delete!!
     while (j < 3) {
         rgb[j] = 0;
         while (color[i] != '\0' && color[i] != ',') {
@@ -17,14 +17,15 @@ unsigned int rgbToUnsignedInt(char *color)
                 return (0);
             }
             rgb[j] = rgb[j] * 10 + (color[i] - '0');
-            printf("color is %d = %c\n", rgb[j], color[i]);
             i++;
+        }
+          if (rgb[j] < 0 || rgb[j] > 255)
+        {
+            ft_printf("Error:\n Invalid RGB value: %d\n", rgb[j]);
+            return (0);
         }
         i++;
         j++;
-    }
-    for (int k = 0; k < 3; k++) {
-        rgb[k] = (rgb[k] < 0) ? 0 : ((rgb[k] > 255) ? 255 : rgb[k]);
     }
     return ((unsigned int)rgb[0] << 16) | ((unsigned int)rgb[1] << 8) | (unsigned int)rgb[2];
 }
@@ -78,7 +79,6 @@ int    copy_texture_element(t_tex *element, char *line)
         element->rgb = rgbToUnsignedInt(element->path);
         if (element->rgb== 0)
             return (-1);
-        printf("final color is 0x%x\n", element->rgb);
     }
     else if (ft_strchr("NSWE", line[0]) != 0) {
         if (access(element->path, O_RDONLY) < 0)
@@ -97,42 +97,43 @@ int check_for_map_start(char *line)
     i = 0;
     while (line[i] && line[i] == ' ')
         i++;
-    if (ft_isdigit(line[i])) {
-        ft_printf("map start: %s\n", line);
-        free(line);
-        return (1);
-    }
+    if (ft_isdigit(line[i]))
+        return (free(line), 1);
     return (0);
 }
 
-int    parse_textures(int file, t_data *img) {
-    t_tex  *head;
+int iterate_texture_element(char *line, t_data *img)
+{
+    if (copy_texture_element(img->tex, line) == -1)
+        return (free(line), -1);
+    img->tex->next = ft_calloc(sizeof(t_tex), 1);
+    if (!img->textures)
+        return (free(line), -1);
+    img->tex = img->tex->next;
+    return (0);
+}
+
+int    parse_textures(int file, t_data *img)
+{
+    t_tex           *head;
     char            *line;
     int             elems;
 
     elems = 0;
     img->tex = ft_calloc(sizeof(t_tex), 1);
     head = img->tex;
-    while (elems < 6) // should check if the line syntax is map, fix later
+    while (elems < 6)
     {
         line = get_next_line(file);
-        if (check_for_map_start(line) == 1) {
+        if (line == NULL || check_for_map_start(line) == 1)
             break ;
-        }
-        if (ft_strlen(line) != 0 && line[0] != '\n')
-        {
-            if (copy_texture_element(img->tex, line) == -1)
+        if (ft_strlen(line) != 0 && line[0] != '\n') {
+            if (iterate_texture_element(line, img) == -1)
                 return (-1);
-            ft_printf("Type: %s, Path: %s, elems %d\n", img->tex->type, img->tex->path, elems);   // Print or use the parsed information as needed
-            img->tex->next = ft_calloc(sizeof(t_tex), 1);
-            if (!img->textures)
-                return (-1);
-            img->tex = img->tex->next;
             elems++;
         }
         free(line);
     }
-    ft_printf("elems is %d\n", elems);
     img->tex = NULL;
     img->tex = head;
     if (check_for_textures(head) == -1)

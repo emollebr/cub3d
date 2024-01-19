@@ -109,12 +109,13 @@ void update_image(t_data *img, t_keys *keys)
         render_minimap(img);
         mlx_do_sync(img->mlx);
        mlx_destroy_image(img->mlx, overlay_img2);
-        //mlx_destroy_image(img->mlx, overlay_img);
+        mlx_destroy_image(img->mlx, overlay_img);
     }
     else
     {
         // Handle error, e.g., print an error message or exit the program
         fprintf(stderr, "Error loading overlay image.\n");
+        free_all(img);
         exit(EXIT_FAILURE);
     }
 }
@@ -151,7 +152,6 @@ char    *get_texture_path(t_data *img, char c)
         tmp = tmp->next;
     if (tmp == NULL)
         return (NULL);
-    printf("tex path for %c is '%s'\n", c, tmp->path);
     return (tmp->path);
 }
 
@@ -494,10 +494,15 @@ void    free_all(t_data *img)
     t_tex   *tmp;
 
     i = -1;
-    while (++i < img->mapHeight)
-        free(img->worldMap[i]);
-    free (img->worldMap);
-    while (img->tex != NULL) {
+    ft_printf("freeing function:\n");
+    if (img->worldMap != NULL) {
+        while (++i < img->mapHeight)
+            free(img->worldMap[i]);
+        free (img->worldMap);
+    }
+    if (img->tex == NULL)
+        free(img->tex);
+    else while (img->tex != NULL) {
         free(img->tex->type);
         free(img->tex->path);
         tmp = img->tex;
@@ -519,10 +524,10 @@ int main(int argc, char **argv)
     img.img = mlx_new_image(img.mlx, WIDTH, HEIGHT);
     img.addr = mlx_get_data_addr(img.img, &img.bits_per_pixel, &img.line_length, &img.endian);
     keys.img = &img;
-
+    img.worldMap = NULL;
     // Parse the .cub file
     if (parse_cub_file(argv[1], &img) == -1)
-        return (-1);
+        return (free_all(&img), -1);
     load_textures(&img);
     // Set player and other initializations
     img.player.old_player_x = img.player.x;
@@ -537,6 +542,8 @@ int main(int argc, char **argv)
 
     // Start the main loop
     mlx_loop(img.mlx);
+    mlx_destroy_window(img.mlx, img.mlx_win);
+    mlx_destroy_image(img.mlx, img.img);
     free_all(&img);
     return (0);
 }
