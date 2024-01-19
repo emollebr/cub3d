@@ -143,29 +143,15 @@ t_color apply_light(t_color color, double distance) {
     return color;
 }
 
-char    *get_texture_path(t_data *img, char c)
-{
-    t_tex   *tmp;
-
-    tmp = img->tex;
-    while (tmp != NULL && tmp->type[0] != c)
-        tmp = tmp->next;
-    if (tmp == NULL)
-        return (NULL);
-    return (tmp->path);
-}
-
 void load_textures(t_data *img)
 {
-    char *paths;
-
-    paths = ft_strdup("NSWEFC");
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 6; i++)
     {
-        img->textures[i].img = mlx_xpm_file_to_image(img->mlx, get_texture_path(img, paths[i]), &img->textures[i].width, &img->textures[i].height);
-        img->textures[i].addr = mlx_get_data_addr(img->textures[i].img, &img->textures[i].bits_per_pixel, &img->textures[i].line_length, &img->textures[i].endian);
+        if (img->textures[i].rgb == 0) {
+            img->textures[i].img = mlx_xpm_file_to_image(img->mlx,  img->textures[i].path, &img->textures[i].width, &img->textures[i].height);
+            img->textures[i].addr = mlx_get_data_addr(img->textures[i].img, &img->textures[i].bits_per_pixel, &img->textures[i].line_length, &img->textures[i].endian);
+        }
     }
-    free(paths);
 }
 
 void draw_textured_wall(t_data *img, t_ray *ray, int x)
@@ -190,6 +176,7 @@ void draw_textured_wall(t_data *img, t_ray *ray, int x)
     if ((ray->side == 0 && ray->ray_dir_x > 0) || (ray->side == 1 && ray->ray_dir_y < 0))
         tex_x = img->textures[tex_num].width - tex_x - 1;
 
+    ft_printf("tex num is %d\n", tex_num);
     for (int y = ray->draw_start; y < ray->draw_end; y++)
     {
         int tex_y = (((y * 256 - HEIGHT * 128 + ray->line_height * 128) * img->textures[tex_num].height) / ray->line_height) / 256;
@@ -202,7 +189,6 @@ void draw_textured_wall(t_data *img, t_ray *ray, int x)
     }
 }
 
-// Helper function to get the color from a texture at specified coordinates
 int get_texture_color(t_texture texture, int x, int y)
 {
     return *(unsigned int *)(texture.addr + (y * texture.line_length + x * (texture.bits_per_pixel / 8)));
@@ -210,8 +196,8 @@ int get_texture_color(t_texture texture, int x, int y)
 
 void draw_textured_floor(t_data *img, int x)
 {
-    int floor_tex_num = 4; // Choose the appropriate floor texture index
-    int ceil_tex_num = 4;  // Choose the appropriate ceiling texture index
+   int floor_color;
+    int ceil_color;
 
     for (int y = HEIGHT / 2 + 1; y < HEIGHT; ++y)
     {
@@ -230,11 +216,11 @@ void draw_textured_floor(t_data *img, int x)
         float floor_x = img->player.x + row_distance * rayDirX0;
         float floor_y = img->player.y + row_distance * rayDirY0;
 
-        int tex_width = img->textures[floor_tex_num].width;
-        int tex_height = img->textures[floor_tex_num].height;
+        int tex_width = img->textures[l_F].width;
+        int tex_height = img->textures[l_F].height;
 
-        int ceil_tex_width = img->textures[ceil_tex_num].width;
-        int ceil_tex_height = img->textures[ceil_tex_num].height;
+        int ceil_tex_width = img->textures[l_C].width;
+        int ceil_tex_height = img->textures[l_C].height;
 
         for (x = 0; x < WIDTH; ++x)
         {
@@ -249,9 +235,14 @@ void draw_textured_floor(t_data *img, int x)
 
             floor_x += floor_step_x;
             floor_y += floor_step_y;
-
-            int floor_color = get_texture_color(img->textures[floor_tex_num], tx, ty);
-            int ceil_color = get_texture_color(img->textures[ceil_tex_num], ceil_tx, ceil_ty);
+            if (img->textures[l_F].rgb != 0)
+                floor_color = img->textures[l_F].rgb;
+            else
+                floor_color = get_texture_color(img->textures[l_F], tx, ty);
+            if (img->textures[l_C].rgb != 0)
+                ceil_color = img->textures[l_C].rgb;
+            else
+                ceil_color = get_texture_color(img->textures[l_C], ceil_tx, ceil_ty);
 			
 			floor_color = darken_color(floor_color,	(double)row_distance);
 			ceil_color = darken_color(ceil_color,	(double)row_distance);
@@ -491,24 +482,16 @@ int render_frame(t_data *img)
 void    free_all(t_data *img)
 {
     int i;
-    t_tex   *tmp;
 
     i = -1;
-    ft_printf("freeing function:\n");
     if (img->worldMap != NULL) {
         while (++i < img->mapHeight)
             free(img->worldMap[i]);
         free (img->worldMap);
     }
-    if (img->tex == NULL)
-        free(img->tex);
-    else while (img->tex != NULL) {
-        free(img->tex->type);
-        free(img->tex->path);
-        tmp = img->tex;
-        img->tex = img->tex->next;
-        free (tmp);
-    }
+    i = -1;
+    while (++i < 6)
+        free(img->textures->path);
     return ;
 }
 
@@ -532,7 +515,6 @@ int main(int argc, char **argv)
     // Set player and other initializations
     img.player.old_player_x = img.player.x;
     img.player.old_player_y = img.player.y;
-    printf("player x: %f, player y: %f\nplayer dir x: %f, player dir y: %f\n, player plane x: %f, player plane y: %f\n", img.player.x, img.player.y, img.player.dir_x, img.player.dir_y, img.player.plane_x, img.player.plane_y);
 
     // Set up event hooks
     mlx_hook(img.mlx_win, 17, 0, close_program, &img);

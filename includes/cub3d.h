@@ -26,6 +26,15 @@
 # define MOV_SPEED 0.1
 # define MIN_DISTANCE_FROM_WALL 0.2
 
+enum  e_texture_type {
+    l_N,
+    l_S,
+    l_W,
+    l_E,
+    l_F,
+    l_C
+};
+
 typedef struct images
 {
 	void	*mlx;
@@ -42,15 +51,6 @@ typedef struct {
     double g;
     double b;
 } t_color;
-
-typedef struct s_minimap {
-    int visible_height;
-    int visible_width;
-    int visible_y;
-    int visible_x;
-    int x;
-    int y;
-} t_minimap;
 
 typedef struct s_keys {
     bool w;
@@ -84,15 +84,21 @@ typedef struct s_texture
     int endian;
     int width;
     int height;
-} t_texture;
-
-typedef struct s_textures
-{
     char *type;
     char *path;
-    unsigned int   rgb;
-    struct s_textures *next;
-} t_tex;
+    unsigned int    rgb;
+} t_texture;
+
+typedef struct s_minimap {
+    int visible_height;
+    int visible_width;
+    int visible_y;
+    int visible_x;
+    int x;
+    int y;
+    t_texture walls;
+    t_texture background;
+} t_minimap;
 
 typedef struct s_data {
 	void	*img;
@@ -115,11 +121,10 @@ typedef struct s_data {
   t_player  player;
   t_keys	keys;
   t_texture	textures[6];
-    t_tex *tex;
   int   **worldMap;
   int   mapHeight;
   int   mapWidth;
-  t_texture minimap[2];
+    t_minimap minimap;
 }	t_data;
 
 
