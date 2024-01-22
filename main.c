@@ -82,7 +82,6 @@ void update_image(t_data *img, t_keys *keys)
     char *relative_path_left = "./images/headedleft.xpm";
     char *relative_path_right = "./images/headedright.xpm";
 
-    printf("%f\n", img->player.x);
     // Check if player.x is even or odd
     if (keys->w || keys->s)
         overlay_img2 = mlx_xpm_file_to_image(img->mlx, relative_path3, &img_width, &img_height);
@@ -123,11 +122,6 @@ void update_image(t_data *img, t_keys *keys)
 
 // Define the apply_light function
 t_color apply_light(t_color color, double distance) {
-    // Apply lighting effects based on the distance or any other criteria
-    // For example, you can reduce the intensity of the color based on distance
-    // This is a simple illustration, adjust it based on your needs
-
-    // Assuming distance-based attenuation
     double attenuation_factor = 1.0 / distance;  // Adjust this factor based on your needs
 
     // Apply attenuation to each color component
@@ -148,10 +142,25 @@ void load_textures(t_data *img)
     for (int i = 0; i < 6; i++)
     {
         if (img->textures[i].rgb == 0) {
-            img->textures[i].img = mlx_xpm_file_to_image(img->mlx,  img->textures[i].path, &img->textures[i].width, &img->textures[i].height);
+            img->textures[i].img = mlx_xpm_file_to_image(img->mlx, img->textures[i].path, &img->textures[i].width, &img->textures[i].height);
             img->textures[i].addr = mlx_get_data_addr(img->textures[i].img, &img->textures[i].bits_per_pixel, &img->textures[i].line_length, &img->textures[i].endian);
         }
     }
+    img->textures[l_MMVA].addr = NULL;
+    img->textures[l_MMBG].addr = NULL;
+    if (access("./images/11.xpm", O_RDONLY) == 0) {
+        img->textures[l_MMBG].img = mlx_xpm_file_to_image(img->mlx, "./images/11.xpm", &img->textures[l_MMBG].width, &img->textures[l_MMBG].height);
+        img->textures[l_MMBG].addr = mlx_get_data_addr(img->textures[l_MMBG].img, &img->textures[l_MMBG].bits_per_pixel, &img->textures[l_MMBG].line_length, &img->textures[l_MMBG].endian);
+    }
+     if (access("./images/4.xpm", O_RDONLY) == 0) {
+        img->textures[l_MMVA].img = mlx_xpm_file_to_image(img->mlx, "./images/4.xpm", &img->textures[l_MMVA].width, &img->textures[l_MMVA].height);
+        img->textures[l_MMVA].addr = mlx_get_data_addr(img->textures[l_MMVA].img, &img->textures[l_MMVA].bits_per_pixel, &img->textures[l_MMVA].line_length, &img->textures[l_MMVA].endian);
+    }
+}
+
+int get_texture_color(t_texture texture, int x, int y)
+{
+    return *(unsigned int *)(texture.addr + (y * texture.line_length + x * (texture.bits_per_pixel / 8)));
 }
 
 void draw_textured_wall(t_data *img, t_ray *ray, int x)
@@ -169,29 +178,22 @@ void draw_textured_wall(t_data *img, t_ray *ray, int x)
         wall_x = img->player.x + ray->perp_wall_dist * ray->ray_dir_x;
         tex_num = (ray->ray_dir_y > 0) ? 0 : 1;
     }
-
     wall_x -= floor(wall_x);
 
-    int tex_x = (int)(wall_x * (double)img->textures[tex_num].width);
+    unsigned int tex_x = (int)(wall_x * img->textures[tex_num].width);
     if ((ray->side == 0 && ray->ray_dir_x > 0) || (ray->side == 1 && ray->ray_dir_y < 0))
         tex_x = img->textures[tex_num].width - tex_x - 1;
 
-    ft_printf("tex num is %d\n", tex_num);
     for (int y = ray->draw_start; y < ray->draw_end; y++)
     {
-        int tex_y = (((y * 256 - HEIGHT * 128 + ray->line_height * 128) * img->textures[tex_num].height) / ray->line_height) / 256;
-        int color = *(unsigned int *)(img->textures[tex_num].addr + (tex_y * img->textures[tex_num].line_length + tex_x * (img->textures[tex_num].bits_per_pixel / 8)));
+         double step = 1.0 * img->textures[tex_num].height / ray->line_height;
+        double tex_y = (y - ray->draw_start) * step;
 
-        // Darken the color for perspective
+        //double tex_y = ((y - ray->draw_start) * 1.0 / (ray->draw_end - ray->draw_start)) * img->textures[tex_num].height;
+        unsigned int color = get_texture_color(img->textures[tex_num], (int)tex_x, (int)tex_y);
         color = darken_color(color, ray->perp_wall_dist);
-
         my_mlx_pixel_put(img, x, y, color);
     }
-}
-
-int get_texture_color(t_texture texture, int x, int y)
-{
-    return *(unsigned int *)(texture.addr + (y * texture.line_length + x * (texture.bits_per_pixel / 8)));
 }
 
 void draw_textured_floor(t_data *img, int x)
@@ -252,9 +254,6 @@ void draw_textured_floor(t_data *img, int x)
         }
     }
 }
-
-
-
 
 void cast_rays(t_data *img)
 {

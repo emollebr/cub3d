@@ -1,7 +1,7 @@
 NO ./images/1.xpm
 SO ./images/2.xpm
-WE ./images/1.xpm
-EA ./images/2.xpm
+WE ./images/5.xpm
+EA ./images/6.xpm
 
 F  ./images/4.xpm
 C  ./images/4.xpm

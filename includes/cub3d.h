@@ -32,7 +32,9 @@ enum  e_texture_type {
     l_W,
     l_E,
     l_F,
-    l_C
+    l_C,
+    l_MMBG,
+    l_MMVA
 };
 
 typedef struct images
@@ -120,7 +122,7 @@ typedef struct s_data {
 	double	jy;
   t_player  player;
   t_keys	keys;
-  t_texture	textures[6];
+  t_texture	textures[8];
   int   **worldMap;
   int   mapHeight;
   int   mapWidth;
