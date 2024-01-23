@@ -146,15 +146,38 @@ void load_textures(t_data *img)
             img->textures[i].addr = mlx_get_data_addr(img->textures[i].img, &img->textures[i].bits_per_pixel, &img->textures[i].line_length, &img->textures[i].endian);
         }
     }
-    img->textures[l_MMVA].addr = NULL;
     img->textures[l_MMBG].addr = NULL;
+    img->textures[l_MMVA].addr = NULL;
     if (access("./images/11.xpm", O_RDONLY) == 0) {
         img->textures[l_MMBG].img = mlx_xpm_file_to_image(img->mlx, "./images/11.xpm", &img->textures[l_MMBG].width, &img->textures[l_MMBG].height);
         img->textures[l_MMBG].addr = mlx_get_data_addr(img->textures[l_MMBG].img, &img->textures[l_MMBG].bits_per_pixel, &img->textures[l_MMBG].line_length, &img->textures[l_MMBG].endian);
     }
-     if (access("./images/4.xpm", O_RDONLY) == 0) {
+    if (access("./images/4.xpm", O_RDONLY) == 0) {
         img->textures[l_MMVA].img = mlx_xpm_file_to_image(img->mlx, "./images/4.xpm", &img->textures[l_MMVA].width, &img->textures[l_MMVA].height);
         img->textures[l_MMVA].addr = mlx_get_data_addr(img->textures[l_MMVA].img, &img->textures[l_MMVA].bits_per_pixel, &img->textures[l_MMVA].line_length, &img->textures[l_MMVA].endian);
+    }
+    img->textures[8].path = ft_strdup("./images/1c.xpm");
+    img->textures[9].path = ft_strdup("./images/2c.xpm");
+    img->textures[10].path = ft_strdup("./images/3c.xpm");
+    img->textures[11].path = ft_strdup("./images/4c.xpm");
+    img->textures[12].path = ft_strdup("./images/5c.xpm");
+    img->textures[13].path = ft_strdup("./images/6c.xpm");
+    img->textures[14].path = ft_strdup("./images/8c.xpm");
+    img->textures[15].path = ft_strdup("./images/9c.xpm");
+    img->textures[16].path = ft_strdup("./images/door1.xpm");
+    img->textures[17].path = ft_strdup("./images/door2.xpm");
+    img->textures[18].path = ft_strdup("./images/door3.xpm");
+    img->textures[19].path = ft_strdup("./images/door4.xpm");
+    img->textures[20].path = ft_strdup("./images/door5.xpm");
+    img->textures[21].path = ft_strdup("./images/door6.xpm");
+    img->textures[22].path = NULL;
+    for (int i = 8; i < 22; i++)
+    {
+        if (access(img->textures[i].path, O_RDONLY) == 0) {
+            ft_printf("loading %s\n", img->textures[i].path);
+            img->textures[i].img = mlx_xpm_file_to_image(img->mlx, img->textures[i].path, &img->textures[i].width, &img->textures[i].height);
+            img->textures[i].addr = mlx_get_data_addr(img->textures[i].img, &img->textures[i].bits_per_pixel, &img->textures[i].line_length, &img->textures[i].endian);
+        }
     }
 }
 
@@ -255,6 +278,309 @@ void draw_textured_floor(t_data *img, int x)
     }
 }
 
+
+void draw_doors(t_data *img, t_door *doors, int x, t_ray *ray)
+{
+
+   // doors->isOpen = 1;
+    
+    if (!doors->isOpen)
+    {
+        printf("a\n");
+        int tex_num;
+        double wall_x;
+
+        if (ray->side == 0)
+        {
+            wall_x = img->player.y + ray->perp_wall_dist * ray->ray_dir_y;
+            tex_num = 16 + doors->currentAnimationFrame;
+        }
+        else
+        {
+            wall_x = img->player.x + ray->perp_wall_dist * ray->ray_dir_x;
+            tex_num = 16 + doors->currentAnimationFrame;
+        }
+        wall_x -= floor(wall_x);
+
+        int tex_x = (int)(wall_x * (double)img->textures[tex_num].width);
+        if ((ray->side == 0 && ray->ray_dir_x > 0) || (ray->side == 1 && ray->ray_dir_y < 0))
+            tex_x = img->textures[tex_num].width - tex_x - 1;
+
+        for (int y = ray->draw_start; y < ray->draw_end; y++)
+        {
+            int tex_y = (((y * 256 - HEIGHT * 128 + ray->line_height * 128) * img->textures[tex_num].height) / ray->line_height) / 256;
+            int color = *(unsigned int *)(img->textures[tex_num].addr + (tex_y * img->textures[tex_num].line_length + tex_x * (img->textures[tex_num].bits_per_pixel / 8)));
+
+            if (color != (int)0xFF000000)
+            {
+            color = darken_color(color, ray->perp_wall_dist);
+            my_mlx_pixel_put(img, x, y, color);
+            }
+        }
+        if(doors->animationspeed > 0)
+            doors->animationspeed--;
+        if(doors->animationspeed == 0 && doors->currentAnimationFrame > 0)
+        {
+            doors->currentAnimationFrame--;
+            doors->animationspeed = 4000;
+        }
+        doors->open_ = false;
+        }
+        else if (doors->isOpen)
+        {
+            int tex_num;
+            double wall_x;
+            if (ray->side == 0)
+            {
+                wall_x = img->player.y + ray->perp_wall_dist * ray->ray_dir_y;
+                tex_num = 13 + doors->currentAnimationFrame;
+            }
+            else
+            {
+                wall_x = img->player.x + ray->perp_wall_dist * ray->ray_dir_x;
+                tex_num = 13 + doors->currentAnimationFrame;
+            }
+            wall_x -= floor(wall_x);
+
+            int tex_x = (int)(wall_x * (double)img->textures[tex_num].width);
+            if ((ray->side == 0 && ray->ray_dir_x > 0) || (ray->side == 1 && ray->ray_dir_y < 0))
+                tex_x = img->textures[tex_num].width - tex_x - 1;
+
+            for (int y = ray->draw_start; y < ray->draw_end; y++)
+            {
+                int tex_y = (((y * 256 - HEIGHT * 128 + ray->line_height * 128) * img->textures[tex_num].height) / ray->line_height) / 256;
+                int color = *(unsigned int *)(img->textures[tex_num].addr + (tex_y * img->textures[tex_num].line_length + tex_x * (img->textures[tex_num].bits_per_pixel / 8)));
+
+            if (color != (int)0xFF000000)
+                {
+                color = darken_color(color, ray->perp_wall_dist);
+
+                my_mlx_pixel_put(img, x, y, color);
+                }
+            }
+            if (doors->animationspeed > 0)
+                doors->animationspeed--;
+            if (doors->animationspeed == 0 &&  !doors->open_)
+            {
+                doors->animationspeed = 3000;
+                doors->currentAnimationFrame = (doors->currentAnimationFrame + 1) % 6;
+            }
+            if (doors->currentAnimationFrame == 5)
+                doors->open_ = true;
+    }
+    
+}
+
+
+// Function to compare the distances between two sprites for sorting
+int compare_sprite_distance(const void *a, const void *b)
+{
+    double distance_a = ((t_sprite_info *)a)->distance;
+    double distance_b = ((t_sprite_info *)b)->distance;
+
+    if (distance_a < distance_b)
+        return 1;
+    else if (distance_a > distance_b)
+        return -1;
+    else
+        return 0;
+}
+
+double calculate_sprite_screen_size(double sprite_x, double sprite_y, double player_x, double player_y, double dir_x, double dir_y, double plane_x, double plane_y)
+{
+    double sprite_screen_x = sprite_x - player_x;
+    double sprite_screen_y = sprite_y - player_y;
+
+    double inv_det = 1.0 / (plane_x * dir_y - dir_x * plane_y);
+
+   // double transform_x = inv_det * (dir_y * sprite_screen_x - dir_x * sprite_screen_y);
+    double transform_y = inv_det * (-plane_y * sprite_screen_x + plane_x * sprite_screen_y);
+
+    int sprite_screen_size = abs((int)(HEIGHT / transform_y));
+
+    return sprite_screen_size;
+}
+
+void draw_sprites(t_data *img)
+{
+    t_sprite_info sprite_info[numSprites];
+    int spriteOrder[numSprites];
+    double spriteDistance[numSprites];
+
+    // Assuming you have an array of sprites named 'sprites' and each sprite has x, y, and texture_index
+    for (int i = 0; i < numSprites; i++)
+    {
+        img->sprites[i].texture_index = 6 + img->currentAnimationFrame; // Adjust the starting Y position of the first sprite
+        spriteOrder[i] = i;
+        img->sprites[i].x = 12.0 + i;
+        img->sprites[i].y = 12.0 + i;
+        spriteDistance[i] = ((img->player.x - img->sprites[i].x) * (img->player.x - img->sprites[i].x) + (img->player.y - img->sprites[i].y) * (img->player.y - img->sprites[i].y));
+        sprite_info[i].sprite_index = i;
+    }
+
+    // Sort the sprites based on distance
+    qsort(sprite_info, numSprites, sizeof(t_sprite_info), compare_sprite_distance);
+
+    // Now, iterate through the sorted sprites and draw them
+    for (int i = 0; i < numSprites; i++)
+    {
+        double spriteX = img->sprites[spriteOrder[i]].x - img->player.x;
+        double spriteY = img->sprites[spriteOrder[i]].y - img->player.y;
+
+        t_sprite *sprite = &img->sprites[spriteOrder[i]];
+
+        double invDet = 1.0 / (img->player.plane_x * img->player.dir_y - img->player.dir_x * img->player.plane_y); //required for correct matrix multiplication
+
+        double transformX = invDet * (img->player.dir_y * spriteX - img->player.dir_x * spriteY);
+        double transformY = invDet * (-img->player.plane_y * spriteX + img->player.plane_x * spriteY); //this is actually the depth inside the screen, that what Z is in 3D
+
+        int spriteScreenX = (int)((WIDTH / 2) * (1 + transformX / transformY));
+
+        // Calculate height of the sprite on screen
+        int spriteHeight = abs((int)(HEIGHT / transformY));
+        // Calculate width of the sprite
+        int spriteWidth = abs((int)(WIDTH / transformY));
+
+        int drawStartY = -spriteHeight / 2 + HEIGHT / 2;
+        if (drawStartY < 0)
+            drawStartY = 0;
+        int drawEndY = spriteHeight / 2 + HEIGHT / 2;
+        if (drawEndY >= HEIGHT)
+            drawEndY = HEIGHT - 1;
+
+        int drawStartX = -spriteWidth / 2 + spriteScreenX;
+        if (drawStartX < 0)
+            drawStartX = 0;
+        int drawEndX = spriteWidth / 2 + spriteScreenX;
+        if (drawEndX > WIDTH)
+            drawEndX = WIDTH;
+
+        for (int stripe = drawStartX; stripe < drawEndX; stripe++)
+        {
+            // Calculate the texture coordinates using spritePixelX
+            int texX = (int)(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * img->textures[sprite->texture_index].width / spriteWidth) / 256;
+            
+
+            // Check if the sprite pixel is not fully transparent
+            if (transformY > 0 && transformY < img->z_buffer[stripe])
+            {
+                
+                for (int y = drawStartY; y < drawEndY; y++) // For every pixel of the current stripe
+                {
+                    int d = (y-MOV_SPEED) * 256 - HEIGHT * 128 + spriteHeight * 128;  //256 and 128 factors to avoid floats
+                    int texY = ((d * img->textures[sprite->texture_index].height) / spriteHeight) / 256;
+                    int color = get_texture_color(img->textures[sprite->texture_index], texX, texY);
+
+                    if (color != (int)0xFF000000)
+                    {
+                        // Darken the color for perspective
+                        color = darken_color(color, spriteDistance[i] / 6);
+
+                        // Draw the sprite pixel
+                        my_mlx_pixel_put(img, stripe, y, color);
+                    }
+                }
+            }
+        }
+    }
+    img->animationspeed--;
+    if (img->animationspeed == 0)
+    {
+    img->currentAnimationFrame = (img->currentAnimationFrame + 1) % 6;
+    img->animationspeed = 6;
+    }
+}
+
+
+void cast_rays_doors(t_data *img)
+{
+    int x;
+    t_ray ray;
+
+    x = 0;
+    while (x < WIDTH)
+    {
+        ray.camera_x = 2 * x / (double)WIDTH - 1; //x-coordinate in camera space
+        ray.ray_dir_x = img->player.dir_x + img->player.plane_x * ray.camera_x;
+        ray.ray_dir_y = img->player.dir_y + img->player.plane_y * ray.camera_x;
+
+        ray.map_x = (int)img->player.x;
+        ray.map_y = (int)img->player.y;
+
+        ray.delta_dist_x = (ray.ray_dir_x == 0) ? 1e30 : fabs(1 / ray.ray_dir_x);
+        ray.delta_dist_y = (ray.ray_dir_y == 0) ? 1e30 : fabs(1 / ray.ray_dir_y);
+		
+    	ray.floor_x_step = ray.perp_wall_dist * (ray.ray_dir_y + ray.floor_y);
+    	ray.floor_y_step = ray.perp_wall_dist * (ray.ray_dir_x + ray.floor_x);
+		
+
+        if (ray.ray_dir_x < 0)
+        {
+            ray.step_x = -1;
+            ray.side_dist_x = (img->player.x - ray.map_x) * ray.delta_dist_x;
+        }
+        else
+        {
+            ray.step_x = 1;
+            ray.side_dist_x = (ray.map_x + 1.0 - img->player.x) * ray.delta_dist_x;
+        }
+        if (ray.ray_dir_y < 0)
+        {
+            ray.step_y = -1;
+            ray.side_dist_y = (img->player.y - ray.map_y) * ray.delta_dist_y;
+        }
+        else
+        {
+            ray.step_y = 1;
+            ray.side_dist_y = (ray.map_y + 1.0 - img->player.y) * ray.delta_dist_y;
+        }
+        ray.hit = 0;
+        while (ray.hit == 0 && ray.map_x > 0 && ray.map_y > 0)
+        {
+            if (ray.side_dist_x < ray.side_dist_y)
+            {
+                ray.side_dist_x += ray.delta_dist_x;
+                ray.map_x += ray.step_x;
+                ray.side = 0;
+            }
+            else
+            {
+                ray.side_dist_y += ray.delta_dist_y;
+                ray.map_y += ray.step_y;
+                ray.side = 1;
+            }
+            if (img->worldMap[ray.map_y][ray.map_x] == 1)
+                ray.hit = 1;
+            if (img->worldMap[ray.map_y][ray.map_x] == 2)
+                ray.hit = 2;
+        }
+
+        if (ray.side == 0)
+            ray.perp_wall_dist = (ray.map_x - img->player.x + (1 - ray.step_x) / 2) / ray.ray_dir_x;
+        else
+            ray.perp_wall_dist = (ray.map_y - img->player.y + (1 - ray.step_y) / 2) / ray.ray_dir_y;
+
+        ray.line_height = (int)(HEIGHT / ray.perp_wall_dist);
+        ray.draw_start = -ray.line_height / 2 + HEIGHT / 2;
+        if (ray.draw_start < 0)
+            ray.draw_start = 0;
+        ray.draw_end = ray.line_height / 2 + HEIGHT / 2;
+        if (ray.draw_end >= HEIGHT)
+            ray.draw_end = HEIGHT - 1;
+
+        
+        // Draw textured walls
+        if (ray.hit == 2)
+        draw_doors(img, &img->doors, x, &ray);
+
+        
+        ray.hit = 0;
+        img->z_buffer[x] = ray.perp_wall_dist;
+        x++;
+  
+    }
+}
+
 void cast_rays(t_data *img)
 {
     int x;
@@ -337,6 +663,8 @@ void cast_rays(t_data *img)
         ray.hit = 0;
         x++;
     }
+    cast_rays_doors(img);
+    draw_sprites(img);
 }
 
 int key_press(int keycode, t_keys *keys)
@@ -353,6 +681,25 @@ int key_press(int keycode, t_keys *keys)
         keys->left = true;
     if (keycode == 65363) // Right arrow key
         keys->right = true;
+     if (keycode == 32) // Space key
+    {
+        // Toggle mouse mode
+        keys->space = !keys->space;
+        keys->img->doors.isOpen = !keys->img->doors.isOpen;
+
+        if (keys->space)
+        {
+            // Hide the mouse cursor
+            mlx_mouse_hide(keys->img->mlx, keys->img->mlx_win);
+            // Reset the mouse position to the center of the screen
+            mlx_mouse_move(keys->img->mlx, keys->img->mlx_win, WIDTH / 2, HEIGHT / 2);
+        }
+        else
+        {
+            // Show the mouse cursor
+            mlx_mouse_show(keys->img->mlx, keys->img->mlx_win);
+        }
+    }
     return (0);
 }
 int key_release(int keycode, t_keys *keys)
@@ -465,6 +812,34 @@ int key_hook(t_keys *keys)
     return (0);
 }
 
+int mouse_motion(int x, int y, t_keys *keys)
+{
+    t_data *img = keys->img;
+
+    if (y != -1 && keys->space)
+    {
+        // Calculate the change in mouse x-coordinate relative to the center of the screen
+        int dx = x - WIDTH / 2;
+
+        // Adjust rotation speed based on the change in mouse position
+        double rotation_speed = 0.0002 * dx;
+
+        // Update the player's view direction and plane direction
+        double oldDirX = img->player.dir_x;
+        img->player.dir_x = img->player.dir_x * cos(rotation_speed) - img->player.dir_y * sin(rotation_speed);
+        img->player.dir_y = oldDirX * sin(rotation_speed) + img->player.dir_y * cos(rotation_speed);
+
+        double oldPlaneX = img->player.plane_x;
+        img->player.plane_x = img->player.plane_x * cos(rotation_speed) - img->player.plane_y * sin(rotation_speed);
+        img->player.plane_y = oldPlaneX * sin(rotation_speed) + img->player.plane_y * cos(rotation_speed);
+
+        // Reset the mouse position to the center of the screen
+        mlx_mouse_move(keys->img->mlx, keys->img->mlx_win, WIDTH / 2, HEIGHT / 2);
+    }
+
+    return (0);
+}
+
 // Update the render_frame function to include the minimap
 int render_frame(t_data *img)
 {
@@ -489,8 +864,8 @@ void    free_all(t_data *img)
         free (img->worldMap);
     }
     i = -1;
-    while (++i < 6)
-        free(img->textures->path);
+    while (img->textures[++i].path != NULL)
+        free(img->textures[i].path);
     return ;
 }
 
@@ -514,11 +889,22 @@ int main(int argc, char **argv)
     // Set player and other initializations
     img.player.old_player_x = img.player.x;
     img.player.old_player_y = img.player.y;
-
+        img.doors.animation_frame = 0;
+    img.doors.open_ = false;
+    img.currentAnimationFrame = 0;
+    img.animationspeed = 6;
+    img.doors.currentAnimationFrame = 0;
+    img.doors.animationspeed = 3000;
+    img.doors.isOpen = 0;
+    for (int i = 0; i < WIDTH; i++)
+    {
+        img.z_buffer[i] = DBL_MAX;
+    }
     // Set up event hooks
     mlx_hook(img.mlx_win, 17, 0, close_program, &img);
     mlx_hook(img.mlx_win, 2, 1L << 0, key_press, &keys);
     mlx_hook(img.mlx_win, 3, 1L << 1, key_release, &keys);
+    mlx_hook(img.mlx_win, 06, 1L << 6, mouse_motion, &keys);
     mlx_loop_hook(img.mlx, (void *)key_hook, &keys);
 
     // Start the main loop

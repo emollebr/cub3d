@@ -22,18 +22,7 @@ int parse_cub_file(const char *filename, t_data *img)
         return (free_all(img), -1);
     if (!validate_map(img)) {
         free_all(img);
-        ft_printf("Error:\n Map is not surrounded by walls.\n");
        return (-1);
-    }
-    // Print the parsed map for debugging
-    printf("Parsed Map:\n");
-    for (int i = 0; i < img->mapHeight; i++)
-    {
-        for (int j = 0; j < img->mapWidth; j++)
-        {
-            printf("%d ", img->worldMap[i][j]);
-        }
-        printf("\n");
     }
     close(file);
     return 0;

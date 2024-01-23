@@ -62,11 +62,10 @@ int    parse_map(int file, char *start_of_map, t_data *img)
     row = 0;
     prevRowLength = 0;
     while (line != NULL) {
-        if (row >= img->mapHeight) {
-            ft_printf("Error: Map size exceeds allowed height.\n");
-            return (-1);
-        }
-
+        // if (row >= img->mapHeight) {
+        //     ft_printf("Error: Map size exceeds allowed height.\n");
+        //     return (-1);
+        // }
         // Ignore leading whitespaces
         col = 0;
         while (line[col] == ' ') {
@@ -101,7 +100,7 @@ int    parse_map(int file, char *start_of_map, t_data *img)
                 } else {
                     // In the case of any non-leading whitespaces, adjacent characters should be '1's or ' 's.
                     if (c == ' ' && line[col - 1] != ' ' && line[col - 1] != '1' && line[col + 1] != '1' && line[col + 1] != ' ') {
-                       ft_printf("Error: Invalid character '%c' at row %d, column %d.", c, row, col);
+                       ft_printf("Error: Invalid character '%c' at row %d, column %d.\n", c, row, col);
                         return (-1);
                     }
                 }
@@ -124,7 +123,7 @@ int    parse_map(int file, char *start_of_map, t_data *img)
                 img->worldMap[row][col] = c - 48;
             col++;
         }
-        while (col < img->mapWidth)
+        while (col < img->mapWidth && row < img->mapHeight)
         {
             img->worldMap[row][col] = 3;
             col++;

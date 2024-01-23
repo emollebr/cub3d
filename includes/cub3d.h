@@ -21,10 +21,14 @@
 # include <fcntl.h>
 # include <math.h>
 # include <stdbool.h>
+# include <float.h>
 
+# define WIDTH 1024
+# define HEIGHT 720
 # define ROT_SPEED 0.07
 # define MOV_SPEED 0.1
 # define MIN_DISTANCE_FROM_WALL 0.2
+# define numSprites 6
 
 enum  e_texture_type {
     l_N,
@@ -36,6 +40,34 @@ enum  e_texture_type {
     l_MMBG,
     l_MMVA
 };
+
+typedef struct s_sprite
+{
+    double x;            // Sprite x-coordinate in the world
+    double y;            // Sprite y-coordinate in the world
+    int texture_index;   // Index of the texture for the sprite
+    int order;
+} t_sprite;
+
+typedef struct s_sprite_info
+{
+    double distance;     // Distance from the player to the sprite
+    int sprite_index;    // Index of the sprite in the array
+} t_sprite_info;
+
+typedef struct s_door {
+    double x;            // Door's x-coordinate
+    double y;            // Door's y-coordinate
+    double width;        // Door's width
+    double height;       // Door's height
+    int isOpen;          // Door's state (0 for closed, 1 for open)
+    double animationTime; // Time elapsed during the door animation
+    int animation_frame;
+    bool open_;
+    bool opening;
+    int currentAnimationFrame;
+    int animationspeed;
+} t_door;
 
 typedef struct images
 {
@@ -61,7 +93,13 @@ typedef struct s_keys {
     bool d;
     bool left;
     bool right;
+    bool space;
     struct s_data *img;
+    int mouse_x;
+    int mouse_y;
+    int prev_mouse_x;
+    int prev_mouse_y;
+    int is_mouse_locked;
 } t_keys;
 
 typedef struct s_player {
@@ -120,13 +158,18 @@ typedef struct s_data {
 	int		color;
 	double	jx;
 	double	jy;
-  t_player  player;
-  t_keys	keys;
-  t_texture	textures[8];
-  int   **worldMap;
-  int   mapHeight;
-  int   mapWidth;
+    t_player  player;
+    t_keys	keys;
+    t_texture	textures[23];
+    double z_buffer[WIDTH];
+    int   **worldMap;
+    int   mapHeight;
+    int   mapWidth;
     t_minimap minimap;
+    t_door    doors;
+    t_sprite  sprites[numSprites];
+    int currentAnimationFrame;
+    unsigned int animationspeed;
 }	t_data;
 
 
@@ -172,38 +215,5 @@ char    *get_map_dimensions(int file, t_data *img);
 int     parse_textures(int file, t_data *img);
 
 void    render_minimap(t_data *img);
-
-# define WIDTH 1024
-# define HEIGHT 720
-
-
-
-// int worldMap[mapWidth][mapHeight]=
-// {
-//   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-//   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,1,0,1,0,0,0,1},
-//   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,0,0,1},
-//   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,1,0,1,0,0,0,1},
-//   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
-//   {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}
-// };
 
 #endif
