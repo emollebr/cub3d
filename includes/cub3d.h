@@ -28,7 +28,6 @@
 # define ROT_SPEED 0.07
 # define MOV_SPEED 0.1
 # define MIN_DISTANCE_FROM_WALL 0.2
-# define numSprites 6
 
 enum  e_texture_type {
     l_N,
@@ -47,6 +46,7 @@ typedef struct s_sprite
     double y;            // Sprite y-coordinate in the world
     int texture_index;   // Index of the texture for the sprite
     int order;
+    struct s_sprite *next;
 } t_sprite;
 
 typedef struct s_sprite_info
@@ -167,7 +167,8 @@ typedef struct s_data {
     int   mapWidth;
     t_minimap minimap;
     t_door    doors;
-    t_sprite  sprites[numSprites];
+    int numSprites;
+    t_sprite  *sprites;
     int currentAnimationFrame;
     unsigned int animationspeed;
 }	t_data;

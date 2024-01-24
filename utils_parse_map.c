@@ -30,6 +30,7 @@ char    *get_map_dimensions(int file, t_data *img)
         line = get_next_line(file);
     }
     free(line);
+    img->sprites = ft_calloc(sizeof(t_sprite), 1);
     return (start_of_map);
 }
 

@@ -209,10 +209,8 @@ void draw_textured_wall(t_data *img, t_ray *ray, int x)
 
     for (int y = ray->draw_start; y < ray->draw_end; y++)
     {
-         double step = 1.0 * img->textures[tex_num].height / ray->line_height;
-        double tex_y = (y - ray->draw_start) * step;
-
-        //double tex_y = ((y - ray->draw_start) * 1.0 / (ray->draw_end - ray->draw_start)) * img->textures[tex_num].height;
+        unsigned int tex_y = (((y * 256 - HEIGHT * 128 + ray->line_height * 128) * img->textures[tex_num].height) / ray->line_height) / 256;
+        tex_y = fmin(fmax(tex_y, 0), img->textures[tex_num].height - 1);
         unsigned int color = get_texture_color(img->textures[tex_num], (int)tex_x, (int)tex_y);
         color = darken_color(color, ray->perp_wall_dist);
         my_mlx_pixel_put(img, x, y, color);
@@ -286,7 +284,6 @@ void draw_doors(t_data *img, t_door *doors, int x, t_ray *ray)
     
     if (!doors->isOpen)
     {
-        printf("a\n");
         int tex_num;
         double wall_x;
 
@@ -371,7 +368,6 @@ void draw_doors(t_data *img, t_door *doors, int x, t_ray *ray)
     
 }
 
-
 // Function to compare the distances between two sprites for sorting
 int compare_sprite_distance(const void *a, const void *b)
 {
@@ -403,31 +399,33 @@ double calculate_sprite_screen_size(double sprite_x, double sprite_y, double pla
 
 void draw_sprites(t_data *img)
 {
-    t_sprite_info sprite_info[numSprites];
-    int spriteOrder[numSprites];
-    double spriteDistance[numSprites];
+    t_sprite sprites[img->numSprites];
+    t_sprite_info sprite_info[img->numSprites];
+    int spriteOrder[img->numSprites];
+    double spriteDistance[img->numSprites];
 
     // Assuming you have an array of sprites named 'sprites' and each sprite has x, y, and texture_index
-    for (int i = 0; i < numSprites; i++)
+    for (int i = 0; i < img->numSprites; i++)
     {
-        img->sprites[i].texture_index = 6 + img->currentAnimationFrame; // Adjust the starting Y position of the first sprite
+        sprites[i].texture_index = 6 + img->currentAnimationFrame; // Adjust the starting Y position of the first sprite
         spriteOrder[i] = i;
-        img->sprites[i].x = 12.0 + i;
-        img->sprites[i].y = 12.0 + i;
-        spriteDistance[i] = ((img->player.x - img->sprites[i].x) * (img->player.x - img->sprites[i].x) + (img->player.y - img->sprites[i].y) * (img->player.y - img->sprites[i].y));
+        sprites[i].x = img->sprites->x;
+        sprites[i].y = img->sprites->y;
+        spriteDistance[i] = ((img->player.x - sprites[i].x) * (img->player.x - sprites[i].x) + (img->player.y - sprites[i].y) * (img->player.y - sprites[i].y));
         sprite_info[i].sprite_index = i;
+        img->sprites = img->sprites->next;
     }
 
-    // Sort the sprites based on distance
-    qsort(sprite_info, numSprites, sizeof(t_sprite_info), compare_sprite_distance);
+ // Sort the sprites based on distance
+    qsort(sprite_info, img->numSprites, sizeof(t_sprite_info), compare_sprite_distance);
 
     // Now, iterate through the sorted sprites and draw them
-    for (int i = 0; i < numSprites; i++)
+    for (int i = 0; i < img->numSprites; i++)
     {
-        double spriteX = img->sprites[spriteOrder[i]].x - img->player.x;
-        double spriteY = img->sprites[spriteOrder[i]].y - img->player.y;
+        double spriteX = sprites[spriteOrder[i]].x - img->player.x;
+        double spriteY = sprites[spriteOrder[i]].y - img->player.y;
 
-        t_sprite *sprite = &img->sprites[spriteOrder[i]];
+        t_sprite *sprite = &sprites[spriteOrder[i]];
 
         double invDet = 1.0 / (img->player.plane_x * img->player.dir_y - img->player.dir_x * img->player.plane_y); //required for correct matrix multiplication
 
@@ -490,7 +488,6 @@ void draw_sprites(t_data *img)
     img->animationspeed = 6;
     }
 }
-
 
 void cast_rays_doors(t_data *img)
 {
@@ -661,10 +658,12 @@ void cast_rays(t_data *img)
         // Draw textured walls
         draw_textured_wall(img, &ray, x);
         ray.hit = 0;
+        img->z_buffer[x] = ray.perp_wall_dist;
         x++;
     }
     cast_rays_doors(img);
-    draw_sprites(img);
+    if (img->sprites)
+        draw_sprites(img);
 }
 
 int key_press(int keycode, t_keys *keys)
@@ -856,6 +855,7 @@ int render_frame(t_data *img)
 void    free_all(t_data *img)
 {
     int i;
+    t_sprite *tmp;
 
     i = -1;
     if (img->worldMap != NULL) {
@@ -866,6 +866,13 @@ void    free_all(t_data *img)
     i = -1;
     while (img->textures[++i].path != NULL)
         free(img->textures[i].path);
+    while (img->sprites != NULL)
+    {
+        tmp = img->sprites;
+        img->sprites = img->sprites->next;
+        free(tmp);
+    }
+    free(img->sprites);
     return ;
 }
 
@@ -882,6 +889,7 @@ int main(int argc, char **argv)
     img.addr = mlx_get_data_addr(img.img, &img.bits_per_pixel, &img.line_length, &img.endian);
     keys.img = &img;
     img.worldMap = NULL;
+    img.numSprites = 0;
     // Parse the .cub file
     if (parse_cub_file(argv[1], &img) == -1)
         return (free_all(&img), -1);

@@ -56,6 +56,7 @@ int    parse_map(int file, char *start_of_map, t_data *img)
     int row;
     int col;
     int prevRowLength;
+    t_sprite *sprite_head;
 
     line = allocate_map(file, start_of_map, img);
     // Read and parse the map
@@ -119,6 +120,21 @@ int    parse_map(int file, char *start_of_map, t_data *img)
                 img->worldMap[row][col] = 3;
             else if (ft_isalpha(c))
                 parse_player_pos(img, c, row, col);
+            else if (c == '5')
+            {
+                if (img->numSprites != 0)
+                {
+                    img->sprites->next = ft_calloc(sizeof(t_sprite), 1);
+                    img->sprites = img->sprites->next;
+                }
+                else
+                    sprite_head = img->sprites;
+                img->numSprites++;
+                img->sprites->x = col;
+                img->sprites->y = row;
+                printf("adding sprite at %f, %f, sprite count: %d\n", img->sprites->x, img->sprites->y, img->numSprites);
+                img->worldMap[row][col] = 0;
+            }
             else
                 img->worldMap[row][col] = c - 48;
             col++;
@@ -134,5 +150,9 @@ int    parse_map(int file, char *start_of_map, t_data *img)
         line = get_next_line(file);
     }
     free(line);
+    img->sprites->next = NULL;
+    if (img->numSprites == 0)
+        free(img->sprites);
+    img->sprites = sprite_head;
     return (0);
 }
