@@ -12,7 +12,15 @@
 
 CC = gcc
 CFLAGS = -g -Wall -Wextra -Werror -fPIE
-CFILES = main.c parse_cub_file.c parse_map.c utils_parse_map.c parse_textures.c minimap.c
+CFILES = main.c \
+		image.c \
+		doors.c \
+		sprites.c \
+		parse_cub_file.c \
+		parse_map.c \
+		utils_parse_map.c \
+		parse_textures.c \
+		minimap.c \
 OFILES = $(CFILES:.c=.o)
 NAME = cub3d
 SRC = sources
@@ -34,9 +42,9 @@ $(SRC)/%.o: $(SRC)/%.c $(HPATH)/%.h
 	@$(CC) $(CFLAGS) -c $< -o $@
 
 clean :
-	@rm -rf ${NAME}
+	@rm -rf ${OFILES}
 
 fclean : clean
-	@rm ${OFILES} $(LIB)
+	@rm ${NAME} $(LIB)
 
 re : fclean all

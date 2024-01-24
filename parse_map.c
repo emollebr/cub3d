@@ -73,7 +73,6 @@ int    parse_map(int file, char *start_of_map, t_data *img)
             img->worldMap[row][col] = 3;
             col++;
         }
-
         // Validate each character in the row
         while (col < img->mapWidth && line[col] != 10) {
             char c = line[col];
@@ -83,7 +82,6 @@ int    parse_map(int file, char *start_of_map, t_data *img)
                 ft_printf("Error: Invalid character '%c' in the map.", c);
                 return (-1);
             }
-
             // Validate based on the specified rules
             if (row == 0 || row == img->mapHeight - 1) {
                 // If the current row is the 0th row or the final row, only accept '1's and ' 's.
@@ -106,7 +104,6 @@ int    parse_map(int file, char *start_of_map, t_data *img)
                     }
                 }
             }
-
             // If strlen(curr_row) > strlen(row_on_top) && current col > strlen(row_on_top), current character should be '1'
             if (row > 0 && (int)ft_strlen(line) > prevRowLength && col >= prevRowLength) {
                 if (c != '1') {
@@ -114,7 +111,6 @@ int    parse_map(int file, char *start_of_map, t_data *img)
                     return (-1);
                 }
             }
-
             // Assign the character to the worldMap
             if (c == ' ' || c == '\n')
                 img->worldMap[row][col] = 3;
@@ -122,21 +118,14 @@ int    parse_map(int file, char *start_of_map, t_data *img)
                 parse_player_pos(img, c, row, col);
             else if (c == '5')
             {
-                if (img->numSprites != 0)
-                {
-                    img->sprites->next = ft_calloc(sizeof(t_sprite), 1);
-                    img->sprites = img->sprites->next;
-                }
-                else
+                if (img->numSprites == 0)
                     sprite_head = img->sprites;
-                img->numSprites++;
-                img->sprites->x = col;
-                img->sprites->y = row;
-                printf("adding sprite at %f, %f, sprite count: %d\n", img->sprites->x, img->sprites->y, img->numSprites);
-                img->worldMap[row][col] = 0;
+               add_sprite(img, row, col);
             }
             else
                 img->worldMap[row][col] = c - 48;
+            if (c == '2' && img->doors.door_bool == 0)
+                img->doors.door_bool = 1;
             col++;
         }
         while (col < img->mapWidth && row < img->mapHeight)
@@ -152,7 +141,10 @@ int    parse_map(int file, char *start_of_map, t_data *img)
     free(line);
     img->sprites->next = NULL;
     if (img->numSprites == 0)
+    {
         free(img->sprites);
+        img->sprites = NULL;
+    }
     img->sprites = sprite_head;
     return (0);
 }

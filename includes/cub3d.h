@@ -14,8 +14,8 @@
 # define CUB3D_H
 
 # include "../minilibx-linux/mlx.h"
-# include "cub3d.h"
 # include "../libft/libft.h"
+# include <stdlib.h>
 # include <string.h>
 # include <stdio.h>
 # include <fcntl.h>
@@ -67,6 +67,7 @@ typedef struct s_door {
     bool opening;
     int currentAnimationFrame;
     int animationspeed;
+    int door_bool;
 } t_door;
 
 typedef struct images
@@ -173,8 +174,6 @@ typedef struct s_data {
     unsigned int animationspeed;
 }	t_data;
 
-
-
 typedef struct s_ray
 {
     double camera_x;
@@ -204,11 +203,21 @@ void    my_mlx_pixel_put(t_data *img, int x, int y, int color);
 void    free_all(t_data *img);
 int     get_texture_color(t_texture texture, int x, int y);
 
+//image.c
+void    update_image(t_data *img, t_keys *keys);
+
+//sprites.c
+int     draw_sprites(t_data *img);
+
+//doors.c
+int     cast_rays_doors(t_data *img);
+
 int     parse_cub_file(const char *filename, t_data *img);
 
 int     parse_map(int file, char *start_of_map, t_data *img);
 
 //map utils
+int     add_sprite(t_data *img, int row, int col);
 int     is_valid_map_char(char c);
 int     validate_map(t_data *img);
 char    *get_map_dimensions(int file, t_data *img);

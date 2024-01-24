@@ -2,7 +2,8 @@
 
 int is_valid_map_char(char c)
 {
-    return (c == '0' || c == '1' || c == 'N' || c == 'S' || c == 'E' || c == 'W' || c == ' ' || c == '5' || c == '2');
+    return (c == '0' || c == '1' || c == 'N' || c == 'S' || c == 'E'
+        || c == 'W' || c == ' ' || c == '5' || c == '2');
 }
 
 char    *get_map_dimensions(int file, t_data *img)
@@ -32,6 +33,22 @@ char    *get_map_dimensions(int file, t_data *img)
     free(line);
     img->sprites = ft_calloc(sizeof(t_sprite), 1);
     return (start_of_map);
+}
+
+int add_sprite(t_data *img, int row, int col)
+{
+    if (img->numSprites > 0)
+    {
+        img->sprites->next = ft_calloc(sizeof(t_sprite), 1);
+        if (!img->sprites->next)
+            return (-1);
+        img->sprites = img->sprites->next;
+    }
+    img->numSprites++;
+    img->sprites->x = col;
+    img->sprites->y = row;
+    img->worldMap[row][col] = 5;
+    return (0);
 }
 
 int validate_map(t_data *img)

@@ -9,8 +9,6 @@
 /*   Updated: 2024/01/15 16:59:36 by lejimene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-#include <stdlib.h>
 #include "includes/cub3d.h"
 
 int darken_color(int color, double distance)
@@ -50,75 +48,6 @@ int close_program(t_data *img)
     mlx_destroy_window(img->mlx, img->mlx_win);
     exit(0);
 }
-
-void draw_overlay_image(t_data *img, void *overlay_img, int overlay_width, int overlay_height, int x_offset, int y_offset)
-{
-    int x, y;
-    int *overlay_data = (int *)mlx_get_data_addr(overlay_img, &img->bits_per_pixel, &img->line_length, &img->endian);
-
-    for (y = 0; y < overlay_height; ++y)
-    {
-        for (x = 0; x < overlay_width; ++x)
-        {
-            int color = overlay_data[y * overlay_width + x];
-            if ((color & 0x00FFFFFF) != 0) // Check if the pixel is not fully transparent
-            {
-                int img_x = x + x_offset;
-                int img_y = y + y_offset;
-                my_mlx_pixel_put(img, img_x, img_y, color);
-            }
-        }
-    }
-}
-
-void update_image(t_data *img, t_keys *keys)
-{
-    // Load overlay images
-    int img_width, img_height;
-    void *overlay_img2;
-    char *relative_path = "./images/hbhbjhb.xpm";
-    char *relative_path2 = "./images/headed1.xpm";
-    char *relative_path3 = "./images/headed2.xpm";
-    char *relative_path_left = "./images/headedleft.xpm";
-    char *relative_path_right = "./images/headedright.xpm";
-
-    // Check if player.x is even or odd
-    if (keys->w || keys->s)
-        overlay_img2 = mlx_xpm_file_to_image(img->mlx, relative_path3, &img_width, &img_height);
-    else if (keys->a)
-        overlay_img2 = mlx_xpm_file_to_image(img->mlx, relative_path_left, &img_width, &img_height);
-    else if (keys->d)
-        overlay_img2 = mlx_xpm_file_to_image(img->mlx, relative_path_right, &img_width, &img_height);
-    else
-        overlay_img2 = mlx_xpm_file_to_image(img->mlx, relative_path2, &img_width, &img_height);
-
-    void *overlay_img = mlx_xpm_file_to_image(img->mlx, relative_path, &img_width, &img_height);
-
-    img->player.old_player_x = img->player.x;
-    img->player.old_player_y = img->player.y;
-
-
-    if (overlay_img != NULL && overlay_img2 != NULL)
-    {
-        // Update the window
-        mlx_put_image_to_window(img->mlx, img->mlx_win, img->img, 0, 0);
-        // Draw overlay images onto the window
-        draw_overlay_image(img, overlay_img2, img_width, img_height, 0, 0);
-        draw_overlay_image(img, overlay_img, img_width, img_height, 0, 0);
-        render_minimap(img);
-        mlx_do_sync(img->mlx);
-       mlx_destroy_image(img->mlx, overlay_img2);
-        mlx_destroy_image(img->mlx, overlay_img);
-    }
-    else
-    {
-        // Handle error, e.g., print an error message or exit the program
-        fprintf(stderr, "Error loading overlay image.\n");
-        free_all(img);
-        exit(EXIT_FAILURE);
-    }
-}
-
 
 // Define the apply_light function
 t_color apply_light(t_color color, double distance) {
@@ -276,309 +205,7 @@ void draw_textured_floor(t_data *img, int x)
     }
 }
 
-
-void draw_doors(t_data *img, t_door *doors, int x, t_ray *ray)
-{
-
-   // doors->isOpen = 1;
-    
-    if (!doors->isOpen)
-    {
-        int tex_num;
-        double wall_x;
-
-        if (ray->side == 0)
-        {
-            wall_x = img->player.y + ray->perp_wall_dist * ray->ray_dir_y;
-            tex_num = 16 + doors->currentAnimationFrame;
-        }
-        else
-        {
-            wall_x = img->player.x + ray->perp_wall_dist * ray->ray_dir_x;
-            tex_num = 16 + doors->currentAnimationFrame;
-        }
-        wall_x -= floor(wall_x);
-
-        int tex_x = (int)(wall_x * (double)img->textures[tex_num].width);
-        if ((ray->side == 0 && ray->ray_dir_x > 0) || (ray->side == 1 && ray->ray_dir_y < 0))
-            tex_x = img->textures[tex_num].width - tex_x - 1;
-
-        for (int y = ray->draw_start; y < ray->draw_end; y++)
-        {
-            int tex_y = (((y * 256 - HEIGHT * 128 + ray->line_height * 128) * img->textures[tex_num].height) / ray->line_height) / 256;
-            int color = *(unsigned int *)(img->textures[tex_num].addr + (tex_y * img->textures[tex_num].line_length + tex_x * (img->textures[tex_num].bits_per_pixel / 8)));
-
-            if (color != (int)0xFF000000)
-            {
-            color = darken_color(color, ray->perp_wall_dist);
-            my_mlx_pixel_put(img, x, y, color);
-            }
-        }
-        if(doors->animationspeed > 0)
-            doors->animationspeed--;
-        if(doors->animationspeed == 0 && doors->currentAnimationFrame > 0)
-        {
-            doors->currentAnimationFrame--;
-            doors->animationspeed = 4000;
-        }
-        doors->open_ = false;
-        }
-        else if (doors->isOpen)
-        {
-            int tex_num;
-            double wall_x;
-            if (ray->side == 0)
-            {
-                wall_x = img->player.y + ray->perp_wall_dist * ray->ray_dir_y;
-                tex_num = 13 + doors->currentAnimationFrame;
-            }
-            else
-            {
-                wall_x = img->player.x + ray->perp_wall_dist * ray->ray_dir_x;
-                tex_num = 13 + doors->currentAnimationFrame;
-            }
-            wall_x -= floor(wall_x);
-
-            int tex_x = (int)(wall_x * (double)img->textures[tex_num].width);
-            if ((ray->side == 0 && ray->ray_dir_x > 0) || (ray->side == 1 && ray->ray_dir_y < 0))
-                tex_x = img->textures[tex_num].width - tex_x - 1;
-
-            for (int y = ray->draw_start; y < ray->draw_end; y++)
-            {
-                int tex_y = (((y * 256 - HEIGHT * 128 + ray->line_height * 128) * img->textures[tex_num].height) / ray->line_height) / 256;
-                int color = *(unsigned int *)(img->textures[tex_num].addr + (tex_y * img->textures[tex_num].line_length + tex_x * (img->textures[tex_num].bits_per_pixel / 8)));
-
-            if (color != (int)0xFF000000)
-                {
-                color = darken_color(color, ray->perp_wall_dist);
-
-                my_mlx_pixel_put(img, x, y, color);
-                }
-            }
-            if (doors->animationspeed > 0)
-                doors->animationspeed--;
-            if (doors->animationspeed == 0 &&  !doors->open_)
-            {
-                doors->animationspeed = 3000;
-                doors->currentAnimationFrame = (doors->currentAnimationFrame + 1) % 6;
-            }
-            if (doors->currentAnimationFrame == 5)
-                doors->open_ = true;
-    }
-    
-}
-
-// Function to compare the distances between two sprites for sorting
-int compare_sprite_distance(const void *a, const void *b)
-{
-    double distance_a = ((t_sprite_info *)a)->distance;
-    double distance_b = ((t_sprite_info *)b)->distance;
-
-    if (distance_a < distance_b)
-        return 1;
-    else if (distance_a > distance_b)
-        return -1;
-    else
-        return 0;
-}
-
-double calculate_sprite_screen_size(double sprite_x, double sprite_y, double player_x, double player_y, double dir_x, double dir_y, double plane_x, double plane_y)
-{
-    double sprite_screen_x = sprite_x - player_x;
-    double sprite_screen_y = sprite_y - player_y;
-
-    double inv_det = 1.0 / (plane_x * dir_y - dir_x * plane_y);
-
-   // double transform_x = inv_det * (dir_y * sprite_screen_x - dir_x * sprite_screen_y);
-    double transform_y = inv_det * (-plane_y * sprite_screen_x + plane_x * sprite_screen_y);
-
-    int sprite_screen_size = abs((int)(HEIGHT / transform_y));
-
-    return sprite_screen_size;
-}
-
-void draw_sprites(t_data *img)
-{
-    t_sprite sprites[img->numSprites];
-    t_sprite_info sprite_info[img->numSprites];
-    int spriteOrder[img->numSprites];
-    double spriteDistance[img->numSprites];
-
-    // Assuming you have an array of sprites named 'sprites' and each sprite has x, y, and texture_index
-    for (int i = 0; i < img->numSprites; i++)
-    {
-        sprites[i].texture_index = 6 + img->currentAnimationFrame; // Adjust the starting Y position of the first sprite
-        spriteOrder[i] = i;
-        sprites[i].x = img->sprites->x;
-        sprites[i].y = img->sprites->y;
-        spriteDistance[i] = ((img->player.x - sprites[i].x) * (img->player.x - sprites[i].x) + (img->player.y - sprites[i].y) * (img->player.y - sprites[i].y));
-        sprite_info[i].sprite_index = i;
-        img->sprites = img->sprites->next;
-    }
-
- // Sort the sprites based on distance
-    qsort(sprite_info, img->numSprites, sizeof(t_sprite_info), compare_sprite_distance);
-
-    // Now, iterate through the sorted sprites and draw them
-    for (int i = 0; i < img->numSprites; i++)
-    {
-        double spriteX = sprites[spriteOrder[i]].x - img->player.x;
-        double spriteY = sprites[spriteOrder[i]].y - img->player.y;
-
-        t_sprite *sprite = &sprites[spriteOrder[i]];
-
-        double invDet = 1.0 / (img->player.plane_x * img->player.dir_y - img->player.dir_x * img->player.plane_y); //required for correct matrix multiplication
-
-        double transformX = invDet * (img->player.dir_y * spriteX - img->player.dir_x * spriteY);
-        double transformY = invDet * (-img->player.plane_y * spriteX + img->player.plane_x * spriteY); //this is actually the depth inside the screen, that what Z is in 3D
-
-        int spriteScreenX = (int)((WIDTH / 2) * (1 + transformX / transformY));
-
-        // Calculate height of the sprite on screen
-        int spriteHeight = abs((int)(HEIGHT / transformY));
-        // Calculate width of the sprite
-        int spriteWidth = abs((int)(WIDTH / transformY));
-
-        int drawStartY = -spriteHeight / 2 + HEIGHT / 2;
-        if (drawStartY < 0)
-            drawStartY = 0;
-        int drawEndY = spriteHeight / 2 + HEIGHT / 2;
-        if (drawEndY >= HEIGHT)
-            drawEndY = HEIGHT - 1;
-
-        int drawStartX = -spriteWidth / 2 + spriteScreenX;
-        if (drawStartX < 0)
-            drawStartX = 0;
-        int drawEndX = spriteWidth / 2 + spriteScreenX;
-        if (drawEndX > WIDTH)
-            drawEndX = WIDTH;
-
-        for (int stripe = drawStartX; stripe < drawEndX; stripe++)
-        {
-            // Calculate the texture coordinates using spritePixelX
-            int texX = (int)(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * img->textures[sprite->texture_index].width / spriteWidth) / 256;
-            
-
-            // Check if the sprite pixel is not fully transparent
-            if (transformY > 0 && transformY < img->z_buffer[stripe])
-            {
-                
-                for (int y = drawStartY; y < drawEndY; y++) // For every pixel of the current stripe
-                {
-                    int d = (y-MOV_SPEED) * 256 - HEIGHT * 128 + spriteHeight * 128;  //256 and 128 factors to avoid floats
-                    int texY = ((d * img->textures[sprite->texture_index].height) / spriteHeight) / 256;
-                    int color = get_texture_color(img->textures[sprite->texture_index], texX, texY);
-
-                    if (color != (int)0xFF000000)
-                    {
-                        // Darken the color for perspective
-                        color = darken_color(color, spriteDistance[i] / 6);
-
-                        // Draw the sprite pixel
-                        my_mlx_pixel_put(img, stripe, y, color);
-                    }
-                }
-            }
-        }
-    }
-    img->animationspeed--;
-    if (img->animationspeed == 0)
-    {
-    img->currentAnimationFrame = (img->currentAnimationFrame + 1) % 6;
-    img->animationspeed = 6;
-    }
-}
-
-void cast_rays_doors(t_data *img)
-{
-    int x;
-    t_ray ray;
-
-    x = 0;
-    while (x < WIDTH)
-    {
-        ray.camera_x = 2 * x / (double)WIDTH - 1; //x-coordinate in camera space
-        ray.ray_dir_x = img->player.dir_x + img->player.plane_x * ray.camera_x;
-        ray.ray_dir_y = img->player.dir_y + img->player.plane_y * ray.camera_x;
-
-        ray.map_x = (int)img->player.x;
-        ray.map_y = (int)img->player.y;
-
-        ray.delta_dist_x = (ray.ray_dir_x == 0) ? 1e30 : fabs(1 / ray.ray_dir_x);
-        ray.delta_dist_y = (ray.ray_dir_y == 0) ? 1e30 : fabs(1 / ray.ray_dir_y);
-		
-    	ray.floor_x_step = ray.perp_wall_dist * (ray.ray_dir_y + ray.floor_y);
-    	ray.floor_y_step = ray.perp_wall_dist * (ray.ray_dir_x + ray.floor_x);
-		
-
-        if (ray.ray_dir_x < 0)
-        {
-            ray.step_x = -1;
-            ray.side_dist_x = (img->player.x - ray.map_x) * ray.delta_dist_x;
-        }
-        else
-        {
-            ray.step_x = 1;
-            ray.side_dist_x = (ray.map_x + 1.0 - img->player.x) * ray.delta_dist_x;
-        }
-        if (ray.ray_dir_y < 0)
-        {
-            ray.step_y = -1;
-            ray.side_dist_y = (img->player.y - ray.map_y) * ray.delta_dist_y;
-        }
-        else
-        {
-            ray.step_y = 1;
-            ray.side_dist_y = (ray.map_y + 1.0 - img->player.y) * ray.delta_dist_y;
-        }
-        ray.hit = 0;
-        while (ray.hit == 0 && ray.map_x > 0 && ray.map_y > 0)
-        {
-            if (ray.side_dist_x < ray.side_dist_y)
-            {
-                ray.side_dist_x += ray.delta_dist_x;
-                ray.map_x += ray.step_x;
-                ray.side = 0;
-            }
-            else
-            {
-                ray.side_dist_y += ray.delta_dist_y;
-                ray.map_y += ray.step_y;
-                ray.side = 1;
-            }
-            if (img->worldMap[ray.map_y][ray.map_x] == 1)
-                ray.hit = 1;
-            if (img->worldMap[ray.map_y][ray.map_x] == 2)
-                ray.hit = 2;
-        }
-
-        if (ray.side == 0)
-            ray.perp_wall_dist = (ray.map_x - img->player.x + (1 - ray.step_x) / 2) / ray.ray_dir_x;
-        else
-            ray.perp_wall_dist = (ray.map_y - img->player.y + (1 - ray.step_y) / 2) / ray.ray_dir_y;
-
-        ray.line_height = (int)(HEIGHT / ray.perp_wall_dist);
-        ray.draw_start = -ray.line_height / 2 + HEIGHT / 2;
-        if (ray.draw_start < 0)
-            ray.draw_start = 0;
-        ray.draw_end = ray.line_height / 2 + HEIGHT / 2;
-        if (ray.draw_end >= HEIGHT)
-            ray.draw_end = HEIGHT - 1;
-
-        
-        // Draw textured walls
-        if (ray.hit == 2)
-        draw_doors(img, &img->doors, x, &ray);
-
-        
-        ray.hit = 0;
-        img->z_buffer[x] = ray.perp_wall_dist;
-        x++;
-  
-    }
-}
-
-void cast_rays(t_data *img)
+int cast_rays(t_data *img)
 {
     int x;
     t_ray ray;
@@ -661,9 +288,15 @@ void cast_rays(t_data *img)
         img->z_buffer[x] = ray.perp_wall_dist;
         x++;
     }
-    cast_rays_doors(img);
-    if (img->sprites)
-        draw_sprites(img);
+    if (img->doors.door_bool == 1) {
+        if (cast_rays_doors(img) == -1)
+            return (-1);
+    }
+    if (img->sprites) {
+        if (draw_sprites(img) == -1)
+            return (-1);
+    }
+    return (0);
 }
 
 int key_press(int keycode, t_keys *keys)
@@ -805,9 +438,9 @@ int key_hook(t_keys *keys)
 
     // Continue with rendering logic
     memset(img->addr, 0, WIDTH * HEIGHT * (img->bits_per_pixel / 8));
-    cast_rays(img);
+    if (cast_rays(img) == -1)
+        return (free_all(img), -1);
     update_image(img, keys);
-
     return (0);
 }
 
@@ -839,16 +472,13 @@ int mouse_motion(int x, int y, t_keys *keys)
     return (0);
 }
 
-// Update the render_frame function to include the minimap
 int render_frame(t_data *img)
 {
     memset(img->addr, 0, WIDTH * HEIGHT * (img->bits_per_pixel / 8));
-
-    cast_rays(img);
-
+    if (cast_rays(img) == -1)
+        return (free_all(img), -1);
     update_image(img, &img->keys);
     key_hook(&img->keys);
-
     return (0);
 }
 
@@ -890,6 +520,7 @@ int main(int argc, char **argv)
     keys.img = &img;
     img.worldMap = NULL;
     img.numSprites = 0;
+    img.doors.door_bool = 0;
     // Parse the .cub file
     if (parse_cub_file(argv[1], &img) == -1)
         return (free_all(&img), -1);
