@@ -203,6 +203,25 @@ void    my_mlx_pixel_put(t_data *img, int x, int y, int color);
 void    free_all(t_data *img);
 int     get_texture_color(t_texture texture, int x, int y);
 
+//cast_rays.c
+int     cast_rays(t_data *img);
+
+//draw.c
+void draw_textured_wall(t_data *img, t_ray *ray, int x);
+void draw_textured_floor(t_data *img, int x);
+
+//key_events.c
+int key_release(int keycode, t_keys *keys);
+int key_hook(t_keys *keys);
+int mouse_motion(int x, int y, t_keys *keys);
+int key_press(int keycode, t_keys *keys);
+
+//utils_textures.c
+int darken_color(int color, double distance);
+t_color apply_light(t_color color, double distance);
+void load_textures(t_data *img);
+int get_texture_color(t_texture texture, int x, int y);
+
 //image.c
 void    update_image(t_data *img, t_keys *keys);
 

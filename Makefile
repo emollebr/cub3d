@@ -21,6 +21,10 @@ CFILES = main.c \
 		utils_parse_map.c \
 		parse_textures.c \
 		minimap.c \
+		cast_rays.c \
+		draw.c \
+		key_events.c \
+		utils_textures.c
 OFILES = $(CFILES:.c=.o)
 NAME = cub3d
 SRC = sources
