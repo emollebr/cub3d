@@ -29,6 +29,11 @@
 # define MOV_SPEED 0.1
 # define MIN_DISTANCE_FROM_WALL 0.2
 
+# define MAP_ERROR_1 "Error: Invalid character in the map: "
+# define MAP_ERROR_2 "Error: Invalid character in the first or last row: "
+# define MAP_ERROR_3 "Error: Invalid character in the first or last column: "
+# define MAP_ERROR_4 "Error: Invalid character "
+
 enum  e_texture_type {
     l_N,
     l_S,
@@ -131,10 +136,10 @@ typedef struct s_texture
 } t_texture;
 
 typedef struct s_minimap {
-    int visible_height;
-    int visible_width;
-    int visible_y;
-    int visible_x;
+    int vis_height;
+    int vis_width;
+    int vis_y;
+    int vis_x;
     int x;
     int y;
     t_texture walls;
@@ -234,18 +239,21 @@ int             cast_rays_doors(t_data *img);
 int             parse_cub_file(const char *filename, t_data *img);
 
 //parse_map.c
-int             parse_map(int file, char *start_of_map, t_data *img);
 int             assign_character_to_map(t_data *img, char c, int row, int col);
 int             check_more_map_rules(char *line, int row, int col, int prevRowLength);
 int             check_map_rules(char *line, int row, int col, t_data *img);
-char            *allocate_map(int file, char *start_of_map, t_data *img);
-void            parse_player_pos(t_data *img, char dir, int row, int col);
+int             parse_loop(t_data *img, char *line, int row, int prev_row_length);
+int             parse_map(int file, char *start_of_map, t_data *img);
 
 //utils_parse_map.c
-int             add_sprite(t_data *img, int row, int col);
-int             is_valid_map_char(char c);
-int             validate_map(t_data *img);
+char            *allocate_map(int file, char *start_of_map, t_data *img);
 char            *get_map_dimensions(int file, t_data *img);
+int             add_sprite(t_data *img, int row, int col);
+int             validate_map(t_data *img);
+
+//utils_parse_map_2.c
+int             is_valid_map_char(char c);
+void            parse_player_pos(t_data *img, char dir, int row, int col);
 
 //parse_textures.c
 int             parse_textures(int file, t_data *img);

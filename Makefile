@@ -19,6 +19,7 @@ CFILES = main.c \
 		parse_cub_file.c \
 		parse_map.c \
 		utils_parse_map.c \
+		utils_parse_map_2.c \
 		parse_textures.c \
 		minimap.c \
 		cast_rays.c \
