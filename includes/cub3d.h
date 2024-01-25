@@ -221,11 +221,16 @@ int             key_hook(t_keys *keys);
 int             mouse_motion(int x, int y, t_keys *keys);
 int             key_press(int keycode, t_keys *keys);
 
-//utils_textures.c
+//utils_colors.c
+int             get_texture_color(t_texture texture, int x, int y);
 int             darken_color(int color, double distance);
 t_color         apply_light(t_color color, double distance);
+
+//utils_textures.c
+void            get_file_paths(t_data *img);
+void            load_sprites_and_doors(t_data *img);
+void            load_minimap_textures(t_data *img, t_texture *bg, t_texture *va);
 void            load_textures(t_data *img);
-int             get_texture_color(t_texture texture, int x, int y);
 
 //image.c
 void            update_image(t_data *img, t_keys *keys);

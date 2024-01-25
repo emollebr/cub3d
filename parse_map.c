@@ -87,8 +87,8 @@ int	parse_loop(t_data *img, char *line, int row, int prev_row_length)
 	{
 		if (!is_valid_map_char(line[col]))
 			return (ft_printf("%s %c\n", MAP_ERROR_1, line[col]), -1);
-		if (!check_map_rules(line, row, col, img) || !check_more_map_rules(line,
-				row, col, prev_row_length))
+		if (check_map_rules(line, row, col, img) == -1 || check_more_map_rules(line,
+				row, col, prev_row_length) == -1)
 			return (-1);
 		assign_character_to_map(img, line[col], row, col);
 		col++;
@@ -110,7 +110,7 @@ int	parse_map(int file, char *start_of_map, t_data *img)
 	line = allocate_map(file, start_of_map, img);
 	row = 0;
 	prev_row_length = 0;
-	while (line != NULL)
+	while (row < img->mapHeight && line != NULL)
 	{
 		if (parse_loop(img, line, row, prev_row_length) == -1)
 			return (-1);

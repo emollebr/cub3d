@@ -47,8 +47,12 @@ void    free_all(t_data *img)
         free (img->worldMap);
     }
     i = -1;
-    while (img->textures[++i].path != NULL)
+    while (img->textures[++i].path != NULL && i < 23)
+    {
+        if (img->textures[i].img != NULL)
+            mlx_destroy_image(img->mlx, img->textures[i].img);
         free(img->textures[i].path);
+    }
     while (img->sprites != NULL)
     {
         tmp = img->sprites;
@@ -65,19 +69,27 @@ int main(int argc, char **argv)
     t_keys keys = {0};
 
     if (argc != 2 || access(argv[1], O_RDONLY) != 0)
-        return (ft_printf("Enter valid .cub file as argument\n"), -1);
+        return (ft_printf("Error: Enter valid .cub file as argument\n"), -1);
+    img.worldMap = NULL;
+    img.numSprites = 0;
+    img.doors.door_bool = 0;
+    int i = 0;
+    while (i < 23)
+    {
+        img.textures[i].path = NULL;
+        img.textures[i].img = NULL;
+        i++;
+    }
+    img.sprites = NULL;
+    // Parse the .cub file
+    if (parse_cub_file(argv[1], &img) == -1)
+        return (free_all(&img), -1);
+    load_textures(&img);
     img.mlx = mlx_init();
     img.mlx_win = mlx_new_window(img.mlx, WIDTH, HEIGHT, "Raycasting Demo");
     img.img = mlx_new_image(img.mlx, WIDTH, HEIGHT);
     img.addr = mlx_get_data_addr(img.img, &img.bits_per_pixel, &img.line_length, &img.endian);
     keys.img = &img;
-    img.worldMap = NULL;
-    img.numSprites = 0;
-    img.doors.door_bool = 0;
-    // Parse the .cub file
-    if (parse_cub_file(argv[1], &img) == -1)
-        return (free_all(&img), -1);
-    load_textures(&img);
     // Set player and other initializations
     img.player.old_player_x = img.player.x;
     img.player.old_player_y = img.player.y;

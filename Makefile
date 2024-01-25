@@ -6,7 +6,7 @@
 #    By: lejimene <lejimene@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/07 17:14:16 by lejimene          #+#    #+#              #
-#    Updated: 2024/01/15 16:47:46 by lejimene         ###   ########.fr        #
+#    Updated: 2024/01/25 18:46:18 by emollebr         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,8 @@ CFILES = main.c \
 		cast_rays.c \
 		draw.c \
 		key_events.c \
-		utils_textures.c
+		utils_textures.c \
+		utils_colors.c
 OFILES = $(CFILES:.c=.o)
 NAME = cub3d
 SRC = sources

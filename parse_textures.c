@@ -12,7 +12,7 @@ unsigned int rgbToUnsignedInt(char *color)
         rgb[j] = 0;
         while (color[i] != '\0' && color[i] != ',') {
             if (ft_isdigit(color[i]) != 1 && color[i] != ',') {
-                ft_printf("Error:\n Invalid floor or ceiling color: %s\n", color);
+                ft_printf("Error: Invalid floor or ceiling color: %s\n", color);
                 return (0);
             }
             rgb[j] = rgb[j] * 10 + (color[i] - '0');
@@ -20,7 +20,7 @@ unsigned int rgbToUnsignedInt(char *color)
         }
           if (rgb[j] < 0 || rgb[j] > 255)
         {
-            ft_printf("Error:\n Invalid RGB value: %d\n", rgb[j]);
+            ft_printf("Error: Invalid RGB value: %d\n", rgb[j]);
             return (0);
         }
         i++;
@@ -39,18 +39,20 @@ int    copy_texture_element(t_texture *element, char *line)
     while (line[i] == ' ')
         i++;
     element->path = ft_substr(line, i, ft_strlen(line) - i - 1);
-    if ((line[0] == 'F' || line[0] == 'C') && ft_isdigit(element->path[0]) == 1) {
+    if ((line[0] == 'F' || line[0] == 'C') && ft_isdigit(element->path[0]) == 1)
+    {
         element->rgb = rgbToUnsignedInt(element->path);
         if (element->rgb== 0)
             return (-1);
     }
-    else if (ft_strchr("NSWEFC", line[0]) != 0) {
+    else if (ft_strchr("NSWEFC", line[0]) != 0)
+    {
         element->rgb = 0;
         if (access(element->path, O_RDONLY) < 0)
-            return (ft_printf("Error:\n Couldn't access texture file: %s\n", element->path), -1);
+            return (ft_printf("Error: Couldn't access texture file: %s\n", element->path), -1);
     }
     else
-        return(ft_printf("Error:\n Invalid line in .cub file: %s\n", line), -1);
+        return(ft_printf("Error: Invalid line in .cub file: %s\n", line), -1);
     return (0);
 }
 
@@ -106,7 +108,7 @@ int    parse_textures(int file, t_data *img)
     }
     while (--elems >= 0) {
      if (!img->textures->path && img->textures->rgb == 0) {
-            ft_printf("Error:\n Missing wall, floor or ceiling info in .cub file\n");
+            ft_printf("Error: Missing wall, floor or ceiling info in .cub file\n");
             return (-1);
         }
     }

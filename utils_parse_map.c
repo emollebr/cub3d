@@ -38,14 +38,14 @@ char	*get_map_dimensions(int file, t_data *img)
 	int		current_width;
 
 	img->mapWidth = 0;
-	img->mapHeight = 1;
+	img->mapHeight = 0;
 	line = get_next_line(file);
 	while (line[0] == '\n')
 	{
 		free(line);
 		line = get_next_line(file);
 	}
-	start_of_map = get_next_line(file);
+	start_of_map = ft_strdup(line);
 	while (line != NULL && line[0] != '\n')
 	{
 		current_width = ft_strlen(line) - 1;
@@ -87,13 +87,13 @@ int	validate_map(t_data *img)
 		if (img->worldMap[i][0] != 1 && img->worldMap[i][0] != 3
 			&& img->worldMap[i][img->mapWidth - 1] != 1
 			&& img->worldMap[i][img->mapWidth - 1] != 3)
-			return (ft_printf("Error:\n Map is not surrounded by walls.\n"), 0);
+			return (ft_printf("Error: Map is not surrounded by walls.\n"), 0);
 		if (img->worldMap[0][i] != 1 && img->worldMap[img->mapHeight
 			- 1][i] != 1 && img->worldMap[0][i] != 3
 			&& img->worldMap[img->mapHeight - 1][i] != 3)
-			return (ft_printf("Error:\n Map is not surrounded by walls.\n"), 0);
+			return (ft_printf("Error: Map is not surrounded by walls.\n"), 0);
 	}
 	if (!img->player.x || !img->player.y)
-		return (ft_printf("Error:\n Missing player position on map.\n"), 0);
+		return (ft_printf("Error: Missing player position on map.\n"), 0);
 	return (1);
 }
