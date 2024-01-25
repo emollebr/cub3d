@@ -166,10 +166,10 @@ typedef struct s_data {
     int   **worldMap;
     int   mapHeight;
     int   mapWidth;
-    t_minimap minimap;
     t_door    doors;
     int numSprites;
     t_sprite  *sprites;
+    t_sprite    *sprite_head;
     int currentAnimationFrame;
     unsigned int animationspeed;
 }	t_data;
@@ -199,50 +199,66 @@ typedef struct s_ray
     double floor_y_step;
 } t_ray;
 
-void    my_mlx_pixel_put(t_data *img, int x, int y, int color);
-void    free_all(t_data *img);
-int     get_texture_color(t_texture texture, int x, int y);
+void            my_mlx_pixel_put(t_data *img, int x, int y, int color);
+void            free_all(t_data *img);
+int             get_texture_color(t_texture texture, int x, int y);
 
 //cast_rays.c
-int     cast_rays(t_data *img);
+int             cast_rays(t_data *img);
 
 //draw.c
-void draw_textured_wall(t_data *img, t_ray *ray, int x);
-void draw_textured_floor(t_data *img, int x);
+void            draw_textured_wall(t_data *img, t_ray *ray, int x);
+void            draw_textured_floor(t_data *img, int x);
 
 //key_events.c
-int key_release(int keycode, t_keys *keys);
-int key_hook(t_keys *keys);
-int mouse_motion(int x, int y, t_keys *keys);
-int key_press(int keycode, t_keys *keys);
+int             key_release(int keycode, t_keys *keys);
+int             key_hook(t_keys *keys);
+int             mouse_motion(int x, int y, t_keys *keys);
+int             key_press(int keycode, t_keys *keys);
 
 //utils_textures.c
-int darken_color(int color, double distance);
-t_color apply_light(t_color color, double distance);
-void load_textures(t_data *img);
-int get_texture_color(t_texture texture, int x, int y);
+int             darken_color(int color, double distance);
+t_color         apply_light(t_color color, double distance);
+void            load_textures(t_data *img);
+int             get_texture_color(t_texture texture, int x, int y);
 
 //image.c
-void    update_image(t_data *img, t_keys *keys);
+void            update_image(t_data *img, t_keys *keys);
 
 //sprites.c
-int     draw_sprites(t_data *img);
+int             draw_sprites(t_data *img);
 
 //doors.c
-int     cast_rays_doors(t_data *img);
+int             cast_rays_doors(t_data *img);
 
-int     parse_cub_file(const char *filename, t_data *img);
+int             parse_cub_file(const char *filename, t_data *img);
 
-int     parse_map(int file, char *start_of_map, t_data *img);
+//parse_map.c
+int             parse_map(int file, char *start_of_map, t_data *img);
+int             assign_character_to_map(t_data *img, char c, int row, int col);
+int             check_more_map_rules(char *line, int row, int col, int prevRowLength);
+int             check_map_rules(char *line, int row, int col, t_data *img);
+char            *allocate_map(int file, char *start_of_map, t_data *img);
+void            parse_player_pos(t_data *img, char dir, int row, int col);
 
-//map utils
-int     add_sprite(t_data *img, int row, int col);
-int     is_valid_map_char(char c);
-int     validate_map(t_data *img);
-char    *get_map_dimensions(int file, t_data *img);
+//utils_parse_map.c
+int             add_sprite(t_data *img, int row, int col);
+int             is_valid_map_char(char c);
+int             validate_map(t_data *img);
+char            *get_map_dimensions(int file, t_data *img);
 
-int     parse_textures(int file, t_data *img);
+//parse_textures.c
+int             parse_textures(int file, t_data *img);
+int             iterate_texture_element(char *line, t_data *img);
+int             check_for_map_start(char *line);
+int             copy_texture_element(t_texture *element, char *line);
+unsigned int    rgbToUnsignedInt(char *color);
 
-void    render_minimap(t_data *img);
+
+void            render_minimap(t_data *img);
+void            draw_player(t_data *img, t_minimap *minimap);
+void            draw_background(t_data *img, t_minimap *minimap);
+void            calculate_visible_area(t_data *img, t_minimap *minimap);
+void            draw_visible_area(t_data *img, t_minimap *minimap, int cell_x, int cell_y);
 
 #endif

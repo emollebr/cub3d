@@ -64,8 +64,8 @@ int main(int argc, char **argv)
     t_data img;
     t_keys keys = {0};
 
-    if (argc != 2)
-        return (ft_printf("Enter .cub file as argument\n"), -1);
+    if (argc != 2 || access(argv[1], O_RDONLY) != 0)
+        return (ft_printf("Enter valid .cub file as argument\n"), -1);
     img.mlx = mlx_init();
     img.mlx_win = mlx_new_window(img.mlx, WIDTH, HEIGHT, "Raycasting Demo");
     img.img = mlx_new_image(img.mlx, WIDTH, HEIGHT);

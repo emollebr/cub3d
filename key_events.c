@@ -92,7 +92,9 @@ int key_hook(t_keys *keys)
         img->player.plane_x = img->player.plane_x * cos(ROT_SPEED) - img->player.plane_y * sin(ROT_SPEED);
         img->player.plane_y = oldPlaneX * sin(ROT_SPEED) + img->player.plane_y * cos(ROT_SPEED);
 		        // Check for collisions with walls after rotation
-        if (img->worldMap[(int)oldPlayerY][(int)img->player.x] == 1 || img->worldMap[(int)img->player.y][(int)oldPlayerX] == 1)
+        if (img->worldMap[(int)oldPlayerY][(int)img->player.x] == 1 || img->worldMap[(int)img->player.y][(int)oldPlayerX] == 1
+            || ((img->worldMap[(int)oldPlayerY][(int)img->player.x] == 2 
+                || img->worldMap[(int)img->player.y][(int)oldPlayerX] == 2) && !img->doors.isOpen))
         {
             // Undo the rotation if there is a wall
             img->player.dir_x = oldDirX;

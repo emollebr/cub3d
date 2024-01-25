@@ -47,6 +47,7 @@ int add_sprite(t_data *img, int row, int col)
     img->numSprites++;
     img->sprites->x = col;
     img->sprites->y = row;
+    img->sprites->next = NULL;
     img->worldMap[row][col] = 5;
     return (0);
 }

@@ -34,11 +34,9 @@ int draw_sprites(t_data *img)
 {
     t_sprite sprites[img->numSprites];
     t_sprite_info sprite_info[img->numSprites];
-    t_sprite *tmp_sprites;
     int spriteOrder[img->numSprites];
     double spriteDistance[img->numSprites];
 
-    tmp_sprites = img->sprites;
     // Assuming you have an array of sprites named 'sprites' and each sprite has x, y, and texture_index
     for (int i = 0; i < img->numSprites; i++)
     {
@@ -46,12 +44,13 @@ int draw_sprites(t_data *img)
         if (!img->textures[sprites[i].texture_index].addr)
             return (ft_printf("Error:\n Missing sprite texture\n"), -1);
         spriteOrder[i] = i;
-        sprites[i].x = tmp_sprites->x;
-        sprites[i].y = tmp_sprites->y;
+        sprites[i].x = img->sprites->x;
+        sprites[i].y = img->sprites->y;
         spriteDistance[i] = ((img->player.x - sprites[i].x) * (img->player.x - sprites[i].x) + (img->player.y - sprites[i].y) * (img->player.y - sprites[i].y));
         sprite_info[i].sprite_index = i;
-       tmp_sprites = tmp_sprites->next;
+        img->sprites = img->sprites->next;
     }
+    img->sprites = img->sprite_head;
 
  // Sort the sprites based on distance
     qsort(sprite_info, img->numSprites, sizeof(t_sprite_info), compare_sprite_distance);

@@ -1,6 +1,5 @@
 #include "includes/cub3d.h"
 
-// Function to read and parse the .cub file using get_next_line
 int parse_cub_file(const char *filename, t_data *img) 
 {
     int             file;
