@@ -49,6 +49,46 @@ char    *allocate_map(int file, char *start_of_map, t_data *img) {
     return (line);
 }
 
+int check_map_rules(char *line, int row, int col, t_data *img)
+{
+    char   c;
+
+    c = line[col];
+     if (row == 0 || row == img->mapHeight - 1) {
+            if (c != '1' && c != ' ') {
+                ft_printf("Error: Invalid character '%c' in the first or last row.\n", c);
+            return (-1);
+            }
+    } else {
+        if (col == 0 || col == img->mapWidth - 1) {
+            if (c != '1') {
+                ft_printf("Error: Invalid character '%c' in the first or last column.\n", c);
+                return (-1);
+            }
+        } else {
+            if (c == ' ' && line[col - 1] != ' ' && line[col - 1] != '1' && line[col + 1] != '1' && line[col + 1] != ' ') {
+                ft_printf("Error: Invalid character '%c' at row %d, column %d.\n", c, row, col);
+                return (-1);
+            }
+        }
+    }
+    return (1);
+}
+
+int check_more_map_rules(char *line, int row, int col, int prevRowLength)
+{
+    char   c;
+
+    c = line[col];
+    if (row > 0 && (int)ft_strlen(line) > prevRowLength && col >= prevRowLength) {
+        if (c != '1') {
+            ft_printf("Error: Invalid character '%c' at row %d, column %d.\n", c, row, col);
+            return (-1);
+        }
+    }
+    return (1);
+}
+
 // Function to parse and validate the map from a file
 int    parse_map(int file, char *start_of_map, t_data *img) 
 {
@@ -63,11 +103,6 @@ int    parse_map(int file, char *start_of_map, t_data *img)
     row = 0;
     prevRowLength = 0;
     while (line != NULL) {
-        // if (row >= img->mapHeight) {
-        //     ft_printf("Error: Map size exceeds allowed height.\n");
-        //     return (-1);
-        // }
-        // Ignore leading whitespaces
         col = 0;
         while (line[col] == ' ') {
             img->worldMap[row][col] = 3;
@@ -77,40 +112,12 @@ int    parse_map(int file, char *start_of_map, t_data *img)
         while (col < img->mapWidth && line[col] != 10) {
             char c = line[col];
 
-            // Check for valid characters
             if (!is_valid_map_char(c)) {
                 ft_printf("Error: Invalid character '%c' in the map.", c);
                 return (-1);
             }
-            // Validate based on the specified rules
-            if (row == 0 || row == img->mapHeight - 1) {
-                // If the current row is the 0th row or the final row, only accept '1's and ' 's.
-                if (c != '1' && c != ' ') {
-                    ft_printf("Error: Invalid character '%c' in the first or last row.\n", c);
-                   return (-1);
-                }
-            } else {
-                // The first and final character should always be a '1'.
-                if (col == 0 || col == img->mapWidth - 1) {
-                    if (c != '1') {
-                        ft_printf("Error: Invalid character '%c' in the first or last column.\n", c);
-                        return (-1);
-                    }
-                } else {
-                    // In the case of any non-leading whitespaces, adjacent characters should be '1's or ' 's.
-                    if (c == ' ' && line[col - 1] != ' ' && line[col - 1] != '1' && line[col + 1] != '1' && line[col + 1] != ' ') {
-                       ft_printf("Error: Invalid character '%c' at row %d, column %d.\n", c, row, col);
-                        return (-1);
-                    }
-                }
-            }
-            // If strlen(curr_row) > strlen(row_on_top) && current col > strlen(row_on_top), current character should be '1'
-            if (row > 0 && (int)ft_strlen(line) > prevRowLength && col >= prevRowLength) {
-                if (c != '1') {
-                    ft_printf("Error: Invalid character '%c' at row %d, column %d.\n", c, row, col);
-                    return (-1);
-                }
-            }
+            if (!check_map_rules(line, row, col, img) || !check_more_map_rules(line, row, col, prevRowLength))
+                return (-1);
             // Assign the character to the worldMap
             if (c == ' ' || c == '\n')
                 img->worldMap[row][col] = 3;
