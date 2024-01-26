@@ -224,7 +224,7 @@ int             key_press(int keycode, t_keys *keys);
 
 //utils_colors.c
 double	        get_scale(t_minimap minimap);
-int             get_original_xy(t_data *img, t_minimap *minimap, int x);
+int             get_original_xy(t_data *img, t_minimap *minimap, int x, int num);
 int             get_texture_color(t_texture texture, int x, int y);
 int             darken_color(int color, double distance);
 t_color         apply_light(t_color color, double distance);

@@ -20,10 +20,18 @@ double	get_scale(t_minimap minimap)
 		return (180.0 / minimap.vis_height);
 }
 
-int	get_original_xy(t_data *img, t_minimap *minimap, int x)
+int	get_original_xy(t_data *img, t_minimap *minimap, int xy, int num)
 {
-	return ((x * img->textures[minimap->wall_or_door].width) / (180
-			/ minimap->vis_width));
+	if (xy == 'x')
+	{
+		return ((num * img->textures[minimap->wall_or_door].width) / (180
+				/ minimap->vis_width));
+	}
+	if (xy == 'y')
+	{
+		return ((num * img->textures[minimap->wall_or_door].height) / (180
+				/ minimap->vis_height));
+	}
 }
 
 int	get_texture_color(t_texture texture, int x, int y)

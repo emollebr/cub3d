@@ -30,8 +30,8 @@ void	draw_visible_area(t_data *img, t_minimap *minimap, int cell_x,
 				color = 0x9e1c1c;
 			else
 			{
-				og_x = get_original_xy(img, minimap, i);
-				og_y = get_original_xy(img, minimap, j);
+				og_x = get_original_xy(img, minimap, x, i);
+				og_y = get_original_xy(img, minimap, y, j);
 				color = get_texture_color(img->textures[minimap->wall_or_door],
 						og_x, og_y);
 			}
