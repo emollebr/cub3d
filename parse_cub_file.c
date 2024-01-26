@@ -12,6 +12,30 @@
 
 #include "includes/cub3d.h"
 
+void	render_minimap(t_data *img)
+{
+	t_minimap	minimap;
+	int			x;
+	int			y;
+
+	minimap.x = 36;
+	minimap.y = HEIGHT - 185;
+	calculate_visible_area(img, &minimap);
+	draw_background(img, &minimap);
+	draw_player(img, &minimap);
+	y = 0;
+	while (y < minimap.vis_height && minimap.vis_y + y < img->mapHeight)
+	{
+		x = 0;
+		while (x < minimap.vis_width && minimap.vis_x + x < img->mapWidth)
+		{
+			scale_visible_area(img, minimap, x, y);
+			x++;
+		}
+		y++;
+	}
+}
+
 int	parse_cub_file(const char *filename, t_data *img)
 {
 	int		file;

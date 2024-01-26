@@ -62,9 +62,9 @@ int	assign_character_to_map(t_data *img, char c, int row, int col)
 		parse_player_pos(img, c, row, col);
 	else if (c == '5')
 	{
-		if (img->numSprites == 0)
-			img->sprite_head = img->sprites;
 		add_sprite(img, row, col);
+		if (img->numSprites == 1)
+			img->sprite_head = img->sprites;
 	}
 	else
 		img->worldMap[row][col] = c - 48;
@@ -120,11 +120,7 @@ int	parse_map(int file, char *start_of_map, t_data *img)
 		line = get_next_line(file);
 	}
 	free(line);
-	if (img->numSprites == 0)
-	{
-		free(img->sprites);
-		img->sprites = NULL;
-	}
-	img->sprites = img->sprite_head;
+	if (img->numSprites > 0)
+		img->sprites = img->sprite_head;
 	return (0);
 }

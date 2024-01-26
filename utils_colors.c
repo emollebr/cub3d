@@ -12,6 +12,20 @@
 
 #include "includes/cub3d.h"
 
+double	get_scale(t_minimap minimap)
+{
+	if (minimap.vis_width < minimap.vis_height)
+		return (180.0 / minimap.vis_width);
+	else
+		return (180.0 / minimap.vis_height);
+}
+
+int	get_original_xy(t_data *img, t_minimap *minimap, int x)
+{
+	return ((x * img->textures[minimap->wall_or_door].width) / (180
+			/ minimap->vis_width));
+}
+
 int	get_texture_color(t_texture texture, int x, int y)
 {
 	return (*(unsigned int *)(texture.addr + (y * texture.line_length + x

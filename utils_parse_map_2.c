@@ -37,8 +37,8 @@ static void	assign_east_or_west(t_data *img, float a, float b)
 void	parse_player_pos(t_data *img, char dir, int row, int col)
 {
 	img->worldMap[row][col] = 0;
-	img->player.x = col;
-	img->player.y = row;
+	img->player.x = col + 0.5;
+	img->player.y = row + 0.5;
 	if (dir == 'N')
 		assign_north_or_south(img, -1.0, 0.66);
 	if (dir == 'S')

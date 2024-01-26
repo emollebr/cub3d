@@ -142,6 +142,7 @@ typedef struct s_minimap {
     int vis_x;
     int x;
     int y;
+    int wall_or_door;
     t_texture walls;
     t_texture background;
 } t_minimap;
@@ -222,6 +223,8 @@ int             mouse_motion(int x, int y, t_keys *keys);
 int             key_press(int keycode, t_keys *keys);
 
 //utils_colors.c
+double	        get_scale(t_minimap minimap);
+int             get_original_xy(t_data *img, t_minimap *minimap, int x);
 int             get_texture_color(t_texture texture, int x, int y);
 int             darken_color(int color, double distance);
 t_color         apply_light(t_color color, double distance);
@@ -241,6 +244,8 @@ int             draw_sprites(t_data *img);
 //doors.c
 int             cast_rays_doors(t_data *img);
 
+//parse_cub_file.c
+void            render_minimap(t_data *img);
 int             parse_cub_file(const char *filename, t_data *img);
 
 //parse_map.c
@@ -267,11 +272,11 @@ int             check_for_map_start(char *line);
 int             copy_texture_element(t_texture *element, char *line);
 unsigned int    rgbToUnsignedInt(char *color);
 
-
-void            render_minimap(t_data *img);
+//minimap.c
 void            draw_player(t_data *img, t_minimap *minimap);
 void            draw_background(t_data *img, t_minimap *minimap);
 void            calculate_visible_area(t_data *img, t_minimap *minimap);
+void            scale_visible_area(t_data *img, t_minimap minimap, int x, int y);
 void            draw_visible_area(t_data *img, t_minimap *minimap, int cell_x, int cell_y);
 
 #endif

@@ -56,7 +56,6 @@ char	*get_map_dimensions(int file, t_data *img)
 		line = get_next_line(file);
 	}
 	free(line);
-	img->sprites = ft_calloc(sizeof(t_sprite), 1);
 	return (start_of_map);
 }
 
@@ -69,6 +68,8 @@ int	add_sprite(t_data *img, int row, int col)
 			return (-1);
 		img->sprites = img->sprites->next;
 	}
+	else
+		img->sprites = ft_calloc(sizeof(t_sprite), 1);
 	img->numSprites++;
 	img->sprites->x = col;
 	img->sprites->y = row;

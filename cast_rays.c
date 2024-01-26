@@ -87,7 +87,7 @@ int cast_rays(t_data *img)
         if (cast_rays_doors(img) == -1)
             return (-1);
     }
-    if (img->sprites) {
+    if (img->sprites != NULL) {
         if (draw_sprites(img) == -1)
             return (-1);
     }
