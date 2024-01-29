@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes/cub3d.h"
+#include "../includes/cub3d.h"
 
 double	get_scale(t_minimap minimap)
 {
@@ -27,7 +27,7 @@ int	get_original_xy(t_data *img, t_minimap *minimap, int xy, int num)
 		return ((num * img->textures[minimap->wall_or_door].width) / (180
 				/ minimap->vis_width));
 	}
-	if (xy == 'y')
+	else
 	{
 		return ((num * img->textures[minimap->wall_or_door].height) / (180
 				/ minimap->vis_height));

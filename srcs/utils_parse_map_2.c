@@ -10,7 +10,26 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes/cub3d.h"
+#include "../includes/cub3d.h"
+
+char	*find_first_line(int file)
+{
+	int			i;
+	char	*line;
+
+	line = get_next_line(file);
+	while (line[0] == '\n' || line[0] == ' ')
+	{
+		i = 0;
+		while (line[i] == ' ')
+			i++;
+		if (ft_isdigit(line[i]) == 1)
+			break ;
+		free(line);
+		line = get_next_line(file);
+	}
+	return (line);
+}
 
 int	is_valid_map_char(char c)
 {

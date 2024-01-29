@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes/cub3d.h"
+#include "../includes/cub3d.h"
 
 int	check_map_rules(char *line, int row, int col, t_data *img)
 {
@@ -42,7 +42,7 @@ int	check_map_rules(char *line, int row, int col, t_data *img)
 
 int	check_more_map_rules(char *line, int row, int col, int prevRowLength)
 {
-	if (row > 0 && (int)ft_strlen(line) > prevRowLength && col >= prevRowLength)
+	if (row > 0 && (int)ft_strlen(line) > prevRowLength && col > prevRowLength)
 	{
 		if (line[col] != '1')
 		{

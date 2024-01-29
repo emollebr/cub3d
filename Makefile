@@ -11,25 +11,30 @@
 # **************************************************************************** #
 
 CC = gcc
-CFLAGS = -g -Wall -Wextra -Werror -fPIE
-CFILES = main.c \
-		image.c \
-		doors.c \
-		sprites.c \
-		parse_cub_file.c \
-		parse_map.c \
-		utils_parse_map.c \
-		utils_parse_map_2.c \
-		parse_textures.c \
-		minimap.c \
-		cast_rays.c \
-		draw.c \
-		key_events.c \
-		utils_textures.c \
-		utils_colors.c
+CFLAGS = -g -Wall -Wextra -Werror
+CFILES =  $(SRC)/main.c \
+	$(SRC)/image.c \
+	 $(SRC)/doors.c \
+	$(SRC)/sprites.c \
+	$(SRC)/parse_cub_file.c \
+	 $(SRC)/parse_map.c \
+	 $(SRC)/utils_parse_map.c \
+	 $(SRC)/utils_parse_map_2.c \
+	 $(SRC)/parse_textures.c \
+	 $(SRC)/minimap.c \
+	 $(SRC)/cast_rays.c \
+	 $(SRC)/draw.c \
+	 $(SRC)/key_events.c \
+	 $(SRC)/utils_textures.c \
+	 $(SRC)/utils_minimap.c \
+	 $(SRC)/utils_colors.c \
+	 $(SRC)/sprites_utils.c \
+	 $(SRC)/player_move.c \
+	 $(SRC)/initialize_params.c \
+	 $(SRC)/draw_doors.c
 OFILES = $(CFILES:.c=.o)
 NAME = cub3d
-SRC = sources
+SRC = ./srcs
 LIB = cub3d.a
 HPATH = includes
 MLXFLAGS = -I ./includes/ -I ./minilibx-linux -I./libft -L./libft -lXext -lX11 -lm

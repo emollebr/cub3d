@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes/cub3d.h"
+#include "../includes/cub3d.h"
 
 void	get_file_paths(t_data *img)
 {
@@ -38,7 +38,8 @@ void	load_sprites_and_doors(t_data *img)
 	i = 0;
 	while (i < 22)
 	{
-		if (img->textures[i].path != NULL && access(img->textures[i].path, O_RDONLY) == 0)
+		if (img->textures[i].path != NULL && access(img->textures[i].path,
+				O_RDONLY) == 0)
 		{
 			img->textures[i].img = mlx_xpm_file_to_image(img->mlx,
 					img->textures[i].path, &img->textures[i].width,
@@ -46,6 +47,7 @@ void	load_sprites_and_doors(t_data *img)
 			img->textures[i].addr = mlx_get_data_addr(img->textures[i].img,
 					&img->textures[i].bits_per_pixel,
 					&img->textures[i].line_length, &img->textures[i].endian);
+			mlx_destroy_image(img->mlx, img->textures[i].img);
 		}
 		i++;
 	}
@@ -86,6 +88,7 @@ void	load_textures(t_data *img)
 			img->textures[i].addr = mlx_get_data_addr(img->textures[i].img,
 					&img->textures[i].bits_per_pixel,
 					&img->textures[i].line_length, &img->textures[i].endian);
+			mlx_destroy_image(img->mlx, img->textures[i].img);
 		}
 		i++;
 	}

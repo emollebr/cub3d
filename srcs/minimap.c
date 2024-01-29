@@ -9,7 +9,7 @@
 /*   Updated: 2024/01/25 17:02:15 by emollebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-#include "includes/cub3d.h"
+#include "../includes/cub3d.h"
 
 void	draw_visible_area(t_data *img, t_minimap *minimap, int cell_x,
 		int cell_y)
@@ -30,38 +30,14 @@ void	draw_visible_area(t_data *img, t_minimap *minimap, int cell_x,
 				color = 0x9e1c1c;
 			else
 			{
-				og_x = get_original_xy(img, minimap, x, i);
-				og_y = get_original_xy(img, minimap, y, j);
+				og_x = get_original_xy(img, minimap, 'x', i);
+				og_y = get_original_xy(img, minimap, 'y', j);
 				color = get_texture_color(img->textures[minimap->wall_or_door],
 						og_x, og_y);
 			}
 			my_mlx_pixel_put(img, cell_x + i, cell_y + j, color);
 		}
 	}
-}
-
-void	calculate_visible_area(t_data *img, t_minimap *minimap)
-{
-	if (img->mapHeight < 10 || img->mapWidth < 10)
-	{
-		minimap->vis_width = img->mapWidth;
-		minimap->vis_height = img->mapHeight;
-	}
-	else
-	{
-		minimap->vis_width = 10;
-		minimap->vis_height = 10;
-	}
-	minimap->vis_x = img->player.x - minimap->vis_width / 2;
-	minimap->vis_y = img->player.y - minimap->vis_height / 2;
-	if (minimap->vis_x < 0)
-		minimap->vis_x = 0;
-	if (minimap->vis_y < 0)
-		minimap->vis_y = 0;
-	if (minimap->vis_x + minimap->vis_width > img->mapWidth)
-		minimap->vis_x = img->mapWidth - minimap->vis_width;
-	if (minimap->vis_y + minimap->vis_height > img->mapHeight)
-		minimap->vis_y = img->mapHeight - minimap->vis_height;
 }
 
 void	draw_background(t_data *img, t_minimap *minimap)
@@ -93,26 +69,27 @@ void	draw_background(t_data *img, t_minimap *minimap)
 
 void	draw_player(t_data *img, t_minimap *minimap)
 {
-	int	player_minimap_x;
-	int	player_minimap_y;
-	int	y;
-	int	x;
+	double	player_angle;
+	int		angle;
+	int		x;
+	int		y;
 
-	player_minimap_x = minimap->x + (int)((img->player.x - minimap->vis_x)
+	minimap->player_x = minimap->x + (int)((img->player.x - minimap->vis_x)
 			* (double)180 / minimap->vis_width);
-	player_minimap_y = minimap->y + (int)((img->player.y - minimap->vis_y)
+	minimap->player_y = minimap->y + (int)((img->player.y - minimap->vis_y)
 			* (double)180 / minimap->vis_height);
-	y = player_minimap_y - 2;
-	while (y <= player_minimap_y + 2)
+	player_angle = atan2(img->player.dir_y, img->player.dir_x);
+	angle = 0;
+	while (angle < 360)
 	{
-		x = player_minimap_x - 2;
-		while (x <= player_minimap_x + 2)
-		{
-			my_mlx_pixel_put(img, x, y, 0xff0000);
-			x++;
-		}
-		y++;
+		x = minimap->player_x + 5 * cos(angle * M_PI / 180.0);
+		y = minimap->player_y + 5 * sin(angle * M_PI / 180.0);
+		my_mlx_pixel_put(img, x, y, 0xffff00);
+		angle++;
 	}
+	minimap->line_end_x = minimap->player_x + 15 * cos(player_angle);
+	minimap->line_end_y = minimap->player_y + 15 * sin(player_angle);
+	draw_line(img, minimap);
 }
 
 void	scale_visible_area(t_data *img, t_minimap minimap, int x, int y)
@@ -139,5 +116,29 @@ void	scale_visible_area(t_data *img, t_minimap minimap, int x, int y)
 				draw_visible_area(img, &minimap, cell_x, cell_y);
 			}
 		}
+	}
+}
+
+void	render_minimap(t_data *img)
+{
+	t_minimap	minimap;
+	int			x;
+	int			y;
+
+	minimap.x = 36;
+	minimap.y = HEIGHT - 185;
+	calculate_visible_area(img, &minimap);
+	draw_background(img, &minimap);
+	draw_player(img, &minimap);
+	y = 0;
+	while (y < minimap.vis_height && minimap.vis_y + y < img->mapHeight)
+	{
+		x = 0;
+		while (x < minimap.vis_width && minimap.vis_x + x < img->mapWidth)
+		{
+			scale_visible_area(img, minimap, x, y);
+			x++;
+		}
+		y++;
 	}
 }

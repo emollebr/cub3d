@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "includes/cub3d.h"
+#include "../includes/cub3d.h"
 
 char	*allocate_map(int file, char *start_of_map, t_data *img)
 {
@@ -22,7 +22,7 @@ char	*allocate_map(int file, char *start_of_map, t_data *img)
 	while (++i < img->mapHeight)
 		img->worldMap[i] = ft_calloc(sizeof(int), img->mapWidth);
 	line = get_next_line(file);
-	while (ft_strncmp(start_of_map, line, ft_strlen(line) != 0))
+	while (ft_strncmp(start_of_map, line, ft_strlen(line)) != 0)
 	{
 		free(line);
 		line = get_next_line(file);
@@ -39,12 +39,7 @@ char	*get_map_dimensions(int file, t_data *img)
 
 	img->mapWidth = 0;
 	img->mapHeight = 0;
-	line = get_next_line(file);
-	while (line[0] == '\n')
-	{
-		free(line);
-		line = get_next_line(file);
-	}
+	line = find_first_line(file);
 	start_of_map = ft_strdup(line);
 	while (line != NULL && line[0] != '\n')
 	{
