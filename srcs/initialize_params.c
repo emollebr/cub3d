@@ -51,9 +51,9 @@ void	initialize_doors(t_data *img)
 	img->animationspeed = 6;
 	img->doors.current_anim_frame = 0;
 	img->doors.animationspeed = 3000;
-	img->doors.isOpen = 0;
+	img->doors.is_open = 0;
 	img->doors.door_bool = 0;
-	img->numSprites = 0;
+	img->num_sprites = 0;
 	img->sprites = NULL;
 	i = 0;
 	while (i < 23)

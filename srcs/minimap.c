@@ -101,17 +101,17 @@ void	scale_visible_area(t_data *img, t_minimap minimap, int x, int y)
 	scale = get_scale(minimap);
 	cell_x = minimap.x + (int)(x * scale);
 	cell_y = minimap.y + (int)(y * scale);
-	if (minimap.vis_x + x >= 0 && minimap.vis_x + x < img->mapWidth)
+	if (minimap.vis_x + x >= 0 && minimap.vis_x + x < img->map_width)
 	{
-		if (minimap.vis_y + y >= 0 && minimap.vis_y + y < img->mapHeight)
+		if (minimap.vis_y + y >= 0 && minimap.vis_y + y < img->map_height)
 		{
-			if (img->worldMap[minimap.vis_y + y][minimap.vis_x + x] == 1
-				|| (img->worldMap[minimap.vis_y + y][minimap.vis_x + x] == 2
-					&& img->doors.isOpen == 0))
+			if (img->world_map[minimap.vis_y + y][minimap.vis_x + x] == 1
+				|| (img->world_map[minimap.vis_y + y][minimap.vis_x + x] == 2
+					&& img->doors.is_open == 0))
 			{
-				if (img->worldMap[minimap.vis_y + y][minimap.vis_x + x] == 1)
+				if (img->world_map[minimap.vis_y + y][minimap.vis_x + x] == 1)
 					minimap.wall_or_door = l_MMVA;
-				if (img->worldMap[minimap.vis_y + y][minimap.vis_x + x] == 2)
+				if (img->world_map[minimap.vis_y + y][minimap.vis_x + x] == 2)
 					minimap.wall_or_door = 16;
 				draw_visible_area(img, &minimap, cell_x, cell_y);
 			}
@@ -131,10 +131,10 @@ void	render_minimap(t_data *img)
 	draw_background(img, &minimap);
 	draw_player(img, &minimap);
 	y = 0;
-	while (y < minimap.vis_height && minimap.vis_y + y < img->mapHeight)
+	while (y < minimap.vis_height && minimap.vis_y + y < img->map_height)
 	{
 		x = 0;
-		while (x < minimap.vis_width && minimap.vis_x + x < img->mapWidth)
+		while (x < minimap.vis_width && minimap.vis_x + x < img->map_width)
 		{
 			scale_visible_area(img, minimap, x, y);
 			x++;

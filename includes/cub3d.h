@@ -16,7 +16,6 @@
 # include "../libft/libft.h"
 # include "../minilibx-linux/mlx.h"
 # include <fcntl.h>
-# include <float.h>
 # include <math.h>
 # include <stdbool.h>
 # include <stdio.h>
@@ -31,6 +30,7 @@
 # ifndef M_PI
 #  define M_PI 3.14159265358979323846
 # endif
+# define DBL_MAX 1.7976931348623157e+308
 
 # define MAP_ERROR_1 "Error: Invalid character in the map: "
 # define MAP_ERROR_2 "Error: Invalid character in the first or last row: "
@@ -53,50 +53,49 @@ enum				e_texture_type
 
 typedef struct s_sprite
 {
-	double x;          // Sprite x-coordinate in the world
-	double y;          // Sprite y-coordinate in the world
-	int texture_index; // Index of the texture for the sprite
+	double			x;
+	double			y;
+	int				tex_idx;
 	int				order;
 	struct s_sprite	*next;
 }					t_sprite;
 
 typedef struct s_sprite_info
 {
-	double distance;  // Distance from the player to the sprite
-	int sprite_index; // Index of the sprite in the array
+	double			distance;
+	int				sprite_index;
 }					t_sprite_info;
 
 typedef struct s_sprite_data
 {
-	double			spriteX;
-	double			spriteY;
+	double			sprite_x;
+	double			sprite_y;
 	t_sprite		*sprite;
-	double			transformX;
-	int				spriteScreenX;
-	int				spriteHeight;
-	int				spriteWidth;
-	int				drawStartY;
-	int				drawEndY;
-	int				drawStartX;
-	int				drawEndX;
-	int				texX;
-	int				texY;
+	double			transform_x;
+	int				sprite_screen_x;
+	int				sprite_height;
+	int				sprite_width;
+	int				draw_start_y;
+	int				draw_end_y;
+	int				draw_start_x;
+	int				draw_end_x;
+	int				tex_x;
+	int				tex_y;
 	int				color;
-	double			invDet;
-	double			transformY;
+	double			inv_det;
+	double			transform_y;
 	int				distance;
-	double			*spriteDistance;
+	double			*sprite_distance;
 	struct s_data	*img;
 }					t_sprite_data;
 
 typedef struct s_door
 {
-	double x;             // Door's x-coordinate
-	double y;             // Door's y-coordinate
-	double width;         // Door's width
-	double height;        // Door's height
-	int isOpen;           // Door's state (0 for closed, 1 for open)
-	double animationTime; // Time elapsed during the door animation
+	double			x;
+	double			y;
+	double			width;
+	double			height;
+	int				is_open;
 	int				animation_frame;
 	bool			open_;
 	bool			opening;
@@ -109,26 +108,26 @@ typedef struct s_door
 	double			wall_x;
 }					t_door;
 
-typedef struct
+typedef struct s_floor_values
 {
-	double			rayDirX0;
-	double			rayDirY0;
-	double			rayDirX1;
-	double			rayDirY1;
+	double			ray_dir_x0;
+	double			ray_dir_y0;
+	double			ray_dir_x1;
+	double			ray_dir_y1;
 	int				p;
-	float			posZ;
+	float			pos_z;
 	float			row_distance;
 	float			floor_step_x;
 	float			floor_step_y;
 	float			floor_x;
 	float			floor_y;
-	int				tex_width_F;
-	int				tex_height_F;
-	int				ceil_tex_width_C;
-	int				ceil_tex_height_C;
+	int				tex_width_f;
+	int				tex_height_f;
+	int				ceil_tex_width_c;
+	int				ceil_tex_height_c;
 	int				x;
-	int				cellX;
-	int				cellY;
+	int				cell_x;
+	int				cell_y;
 	int				tx;
 	int				ty;
 	int				ceil_tx;
@@ -148,7 +147,7 @@ typedef struct images
 	int				ret;
 }					t_img;
 
-typedef struct
+typedef struct s_color
 {
 	double			r;
 	double			g;
@@ -241,11 +240,11 @@ typedef struct s_data
 	t_keys			keys;
 	t_texture		textures[23];
 	double			z_buffer[WIDTH];
-	int				**worldMap;
-	int				mapHeight;
-	int				mapWidth;
+	int				**world_map;
+	int				map_height;
+	int				map_width;
 	t_door			doors;
-	int				numSprites;
+	int				num_sprites;
 	t_sprite		*sprites;
 	t_sprite		*sprite_head;
 	int				current_anim_frame;
@@ -277,7 +276,6 @@ typedef struct s_ray
 	double			floor_y_step;
 }					t_ray;
 
-void				my_mlx_pixel_put(t_data *img, int x, int y, int color);
 int					close_program(t_data *img);
 void				free_all(t_data *img);
 int					get_texture_color(t_texture texture, int x, int y);
@@ -328,6 +326,8 @@ void				rotate_player(t_data *img, double rot_speed, int direction);
 void				handle_player_movement(t_keys *keys, t_data *img);
 
 // image.c
+void				draw_overlay_image(t_data *img, void *overlay_img,
+						int overlay_width, int overlay_height);
 void				update_image(t_data *img, t_keys *keys);
 
 // sprites.c
@@ -353,6 +353,11 @@ int					draw_doors(t_data *img, t_door *doors, int x, t_ray *ray);
 
 // parse_cub_file.c
 int					validate_textures(t_data *img, int elems);
+unsigned int		calculate_wall_values(t_ray *ray, t_data *img, int *tex_num,
+						double *wall_x);
+void				sync_overlay_images(t_data *img, void **overlay_img,
+						int img_width, int img_height);
+void				my_mlx_pixel_put(t_data *img, int x, int y, int color);
 int					parse_cub_file(const char *filename, t_data *img);
 
 // parse_map.c

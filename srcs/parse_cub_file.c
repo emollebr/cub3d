@@ -25,6 +25,51 @@ int	validate_textures(t_data *img, int elems)
 	return (1);
 }
 
+unsigned int	calculate_wall_values(t_ray *ray, t_data *img, int *tex_num,
+		double *wall_x)
+{
+	unsigned int	tex_x;
+
+	if (ray->side == 0)
+	{
+		*wall_x = img->player.y + ray->perp_wall_dist * ray->ray_dir_y;
+		*tex_num = (ray->ray_dir_x > 0) * 2 + (ray->ray_dir_x <= 0) * 3;
+	}
+	else
+	{
+		*wall_x = img->player.x + ray->perp_wall_dist * ray->ray_dir_x;
+		*tex_num = (ray->ray_dir_y > 0) * 0 + (ray->ray_dir_y <= 0) * 1;
+	}
+	*wall_x -= floor(*wall_x);
+	tex_x = (unsigned int)(*wall_x * img->textures[*tex_num].width);
+	if ((ray->side == 0 && ray->ray_dir_x > 0) || (ray->side == 1
+			&& ray->ray_dir_y < 0))
+		tex_x = img->textures[*tex_num].width - tex_x - 1;
+	return (tex_x);
+}
+
+void	sync_overlay_images(t_data *img, void **overlay_img, int img_width,
+		int img_height)
+{
+	mlx_put_image_to_window(img->mlx, img->mlx_win, img->img, 0, 0);
+	render_minimap(img);
+	draw_overlay_image(img, overlay_img[0], img_width, img_height);
+	draw_overlay_image(img, overlay_img[1], img_width, img_height);
+	draw_overlay_image(img, overlay_img[2], img_width, img_height);
+	mlx_do_sync(img->mlx);
+	mlx_destroy_image(img->mlx, overlay_img[0]);
+	mlx_destroy_image(img->mlx, overlay_img[1]);
+	mlx_destroy_image(img->mlx, overlay_img[2]);
+}
+
+void	my_mlx_pixel_put(t_data *img, int x, int y, int color)
+{
+	char	*dst;
+
+	dst = img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8));
+	*(unsigned int *)dst = color;
+}
+
 int	parse_cub_file(const char *filename, t_data *img)
 {
 	int		file;

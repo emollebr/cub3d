@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   key_events.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: emollebr <emollebr@student.42berlin.d      +#+  +:+       +#+        */
+/*   By: lejimene <lejimene@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/29 17:45:12 by emollebr          #+#    #+#             */
-/*   Updated: 2024/01/29 17:45:13 by emollebr         ###   ########.fr       */
+/*   Created: 2024/01/26 16:11:37 by lejimene          #+#    #+#             */
+/*   Updated: 2024/01/26 18:08:19 by lejimene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,120 +14,29 @@
 
 int	key_release(int keycode, t_keys *keys)
 {
-	if (keycode == 119) // W key
+	if (keycode == 119)
 		keys->w = false;
-	if (keycode == 115) // S key
+	if (keycode == 115)
 		keys->s = false;
-	if (keycode == 97) // A key
+	if (keycode == 97)
 		keys->a = false;
-	if (keycode == 100) // D key
+	if (keycode == 100)
 		keys->d = false;
-	if (keycode == 65361) // Left arrow key
+	if (keycode == 65361)
 		keys->left = false;
-	if (keycode == 65363) // Right arrow key
+	if (keycode == 65363)
 		keys->right = false;
 	if (keycode == 113)
 		keys->q = false;
-	if (keycode == 65307)
-		close_program(keys->img);
 	return (0);
 }
 
 int	key_hook(t_keys *keys)
 {
-	double	oldPlayerX;
-	double	oldPlayerY;
-	double	oldPlaneY;
-	double	oldDirX;
-	double	oldPlaneX;
+	t_data	*img;
 
-	t_data *img = keys->img;
-		// Assuming keys->img holds a reference to your t_data structure
-	oldPlayerX = img->player.x;
-	oldPlayerY = img->player.y;
-	// Handle key presses
-	if (keys->w)
-	{
-		img->player.x += img->player.dir_x * MOV_SPEED;
-		img->player.y += img->player.dir_y * MOV_SPEED;
-	}
-	if (keys->s)
-	{
-		img->player.x -= img->player.dir_x * MOV_SPEED;
-		img->player.y -= img->player.dir_y * MOV_SPEED;
-	}
-	if (keys->a)
-	{
-		img->player.x -= img->player.plane_x * MOV_SPEED;
-		img->player.y -= img->player.plane_y * MOV_SPEED;
-	}
-	if (keys->d)
-	{
-		img->player.x += img->player.plane_x * MOV_SPEED;
-		img->player.y += img->player.plane_y * MOV_SPEED;
-	}
-	// Check for collisions with walls
-	if (img->worldMap[(int)oldPlayerY][(int)img->player.x] == 1)
-	{
-		// Undo the player's movement if there is a wall in the new X position
-		img->player.x = oldPlayerX;
-	}
-	if (img->worldMap[(int)img->player.y][(int)oldPlayerX] == 1)
-	{
-		// Undo the player's movement if there is a wall in the new Y position
-		img->player.y = oldPlayerY;
-	}
-	double oldDirY = img->player.dir_y; // Add this line
-	oldPlaneY = img->player.plane_y;
-	if (keys->left)
-	{
-		// Handle rotation to the left
-		oldDirX = img->player.dir_x;
-		img->player.dir_x = img->player.dir_x * cos(-ROT_SPEED)
-			- img->player.dir_y * sin(-ROT_SPEED);
-		img->player.dir_y = oldDirX * sin(-ROT_SPEED) + img->player.dir_y
-			* cos(-ROT_SPEED);
-		oldPlaneX = img->player.plane_x;
-		img->player.plane_x = img->player.plane_x * cos(-ROT_SPEED)
-			- img->player.plane_y * sin(-ROT_SPEED);
-		img->player.plane_y = oldPlaneX * sin(-ROT_SPEED) + img->player.plane_y
-			* cos(-ROT_SPEED);
-		// Check for collisions with walls after rotation
-		if (img->worldMap[(int)oldPlayerY][(int)img->player.x] == 1
-			|| img->worldMap[(int)img->player.y][(int)oldPlayerX] == 1)
-		{
-			// Undo the rotation if there is a wall
-			img->player.dir_x = oldDirX;
-			img->player.dir_y = oldDirY;
-			img->player.plane_x = oldPlaneX;
-			img->player.plane_y = oldPlaneY;
-		}
-	}
-	if (keys->right)
-	{
-		// Handle rotation to the right
-		oldDirX = img->player.dir_x;
-		img->player.dir_x = img->player.dir_x * cos(ROT_SPEED)
-			- img->player.dir_y * sin(ROT_SPEED);
-		img->player.dir_y = oldDirX * sin(ROT_SPEED) + img->player.dir_y
-			* cos(ROT_SPEED);
-		oldPlaneX = img->player.plane_x;
-		img->player.plane_x = img->player.plane_x * cos(ROT_SPEED)
-			- img->player.plane_y * sin(ROT_SPEED);
-		img->player.plane_y = oldPlaneX * sin(ROT_SPEED) + img->player.plane_y
-			* cos(ROT_SPEED);
-		// Check for collisions with walls after rotation
-		if (img->worldMap[(int)oldPlayerY][(int)img->player.x] == 1
-			|| img->worldMap[(int)img->player.y][(int)oldPlayerX] == 1)
-		{
-			// Undo the rotation if there is a wall
-			img->player.dir_x = oldDirX;
-			img->player.dir_y = oldDirY;
-			img->player.plane_x = oldPlaneX;
-			img->player.plane_y = oldPlaneY;
-		}
-	}
-	// Continue with rendering logic
+	img = keys->img;
+	handle_player_movement(keys, img);
 	memset(img->addr, 0, WIDTH * HEIGHT * (img->bits_per_pixel / 8));
 	if (cast_rays(img) == -1)
 		return (free_all(img), -1);
@@ -138,72 +47,65 @@ int	key_hook(t_keys *keys)
 int	mouse_motion(int x, int y, t_keys *keys)
 {
 	t_data	*img;
-	int		dx;
 	double	rotation_speed;
-	double	oldDirX;
-	double	oldPlaneX;
+	double	olddir_x;
+	double	oldplane_x;
 
 	img = keys->img;
 	if (y != -1 && keys->space)
 	{
-		// Calculate the change in mouse x-coordinate relative to the center of the screen
-		dx = x - WIDTH / 2;
-		// Adjust rotation speed based on the change in mouse position
-		rotation_speed = 0.0002 * dx;
-		// Update the player's view direction and plane direction
-		oldDirX = img->player.dir_x;
+		rotation_speed = 0.0002 * (x - WIDTH / 2);
+		olddir_x = img->player.dir_x;
 		img->player.dir_x = img->player.dir_x * cos(rotation_speed)
 			- img->player.dir_y * sin(rotation_speed);
-		img->player.dir_y = oldDirX * sin(rotation_speed) + img->player.dir_y
+		img->player.dir_y = olddir_x * sin(rotation_speed) + img->player.dir_y
 			* cos(rotation_speed);
-		oldPlaneX = img->player.plane_x;
+		oldplane_x = img->player.plane_x;
 		img->player.plane_x = img->player.plane_x * cos(rotation_speed)
 			- img->player.plane_y * sin(rotation_speed);
-		img->player.plane_y = oldPlaneX * sin(rotation_speed)
+		img->player.plane_y = oldplane_x * sin(rotation_speed)
 			+ img->player.plane_y * cos(rotation_speed);
-		// Reset the mouse position to the center of the screen
 		mlx_mouse_move(keys->img->mlx, keys->img->mlx_win, WIDTH / 2, HEIGHT
 			/ 2);
 	}
 	return (0);
 }
 
+void	key_space(t_keys *keys)
+{
+	keys->space = !keys->space;
+	if (keys->space)
+	{
+		mlx_mouse_hide(keys->img->mlx, keys->img->mlx_win);
+		mlx_mouse_move(keys->img->mlx, keys->img->mlx_win, WIDTH / 2, HEIGHT
+			/ 2);
+	}
+	else
+		mlx_mouse_show(keys->img->mlx, keys->img->mlx_win);
+}
+
 int	key_press(int keycode, t_keys *keys)
 {
-	if (keycode == 119) // W key
+	if (keycode == 119)
 		keys->w = true;
-	if (keycode == 115) // S key
+	if (keycode == 115)
 		keys->s = true;
-	if (keycode == 97) // A key
+	if (keycode == 97)
 		keys->a = true;
-	if (keycode == 100) // D key
+	if (keycode == 100)
 		keys->d = true;
-	if (keycode == 65361) // Left arrow key
+	if (keycode == 65361)
 		keys->left = true;
-	if (keycode == 65363) // Right arrow key
+	if (keycode == 65363)
 		keys->right = true;
-	if (keycode == 32) // Space key
-	{
-		// Toggle mouse mode
-		keys->space = !keys->space;
-		if (keys->space)
-		{
-			// Hide the mouse cursor
-			mlx_mouse_hide(keys->img->mlx, keys->img->mlx_win);
-			// Reset the mouse position to the center of the screen
-			mlx_mouse_move(keys->img->mlx, keys->img->mlx_win, WIDTH / 2, HEIGHT
-				/ 2);
-		}
-		else
-		{
-			// Show the mouse cursor
-			mlx_mouse_show(keys->img->mlx, keys->img->mlx_win);
-		}
-	}
+	if (keycode == 32)
+		key_space(keys);
 	if (keycode == 113)
 	{
 		keys->q = true;
-		keys->img->doors.isOpen = !keys->img->doors.isOpen;
+		if (keys->img->world_map[(int)keys->img->player.y]
+			[(int)keys->img->player.x] != 2)
+			keys->img->doors.is_open = !keys->img->doors.is_open;
 	}
 	return (0);
 }

@@ -15,7 +15,7 @@
 char	*find_first_line(int file)
 {
 	int			i;
-	char	*line;
+	char		*line;
 
 	line = get_next_line(file);
 	while (line[0] == '\n' || line[0] == ' ')
@@ -55,7 +55,7 @@ static void	assign_east_or_west(t_data *img, float a, float b)
 
 void	parse_player_pos(t_data *img, char dir, int row, int col)
 {
-	img->worldMap[row][col] = 0;
+	img->world_map[row][col] = 0;
 	img->player.x = col + 0.5;
 	img->player.y = row + 0.5;
 	if (dir == 'N')

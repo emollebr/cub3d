@@ -11,14 +11,6 @@
 /* ************************************************************************** */
 #include "../includes/cub3d.h"
 
-void	my_mlx_pixel_put(t_data *img, int x, int y, int color)
-{
-	char	*dst;
-
-	dst = img->addr + (y * img->line_length + x * (img->bits_per_pixel / 8));
-	*(unsigned int *)dst = color;
-}
-
 int	close_program(t_data *img)
 {
 	free_all(img);
@@ -39,47 +31,53 @@ int	render_frame(t_data *img)
 	return (0);
 }
 
+void	free_sprites(t_sprite *sprites)
+{
+	t_sprite	*tmp;
+
+	while (sprites != NULL)
+	{
+		tmp = sprites;
+		sprites = sprites->next;
+		free(tmp);
+	}
+	free(sprites);
+}
+
 void	free_all(t_data *img)
 {
 	int			i;
-	t_sprite	*tmp;
 
 	i = -1;
-	if (img->worldMap != NULL)
+	if (img->world_map != NULL)
 	{
-		while (++i < img->mapHeight)
-			free(img->worldMap[i]);
-		free(img->worldMap);
+		while (++i < img->map_height)
+			free(img->world_map[i]);
+		free(img->world_map);
 	}
-	i = 0;
-	while (i < 23)
+	i = -1;
+	while (++i < 23)
 	{
 		if (img->textures[i].img != NULL)
 		{
 			mlx_destroy_image(img->mlx, img->textures[i].img);
 			free(img->textures[i].path);
 		}
-		i++;
 	}
-	while (img->sprites != NULL)
-	{
-		tmp = img->sprites;
-		img->sprites = img->sprites->next;
-		free(tmp);
-	}
-	free(img->sprites);
+	free_sprites(img->sprites);
 	return ;
 }
 
 int	main(int argc, char **argv)
 {
-	t_data img;
-	t_keys keys = {0};
+	t_data	img;
+	t_keys	keys;
 
 	if (argc != 2)
 		return (ft_printf("Enter .cub file as argument\n"), -1);
+	keys.is_mouse_locked = 0;
 	keys.img = &img;
-	img.worldMap = NULL;
+	img.world_map = NULL;
 	initialize_doors(&img);
 	if (parse_cub_file(argv[1], &img) == -1)
 		return (free_all(&img), -1);

@@ -47,7 +47,6 @@ void	load_sprites_and_doors(t_data *img)
 			img->textures[i].addr = mlx_get_data_addr(img->textures[i].img,
 					&img->textures[i].bits_per_pixel,
 					&img->textures[i].line_length, &img->textures[i].endian);
-			mlx_destroy_image(img->mlx, img->textures[i].img);
 		}
 		i++;
 	}

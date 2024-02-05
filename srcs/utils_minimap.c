@@ -57,10 +57,10 @@ void	draw_line(t_data *img, t_minimap *minimap)
 
 void	calculate_visible_area(t_data *img, t_minimap *minimap)
 {
-	if (img->mapHeight < 10 || img->mapWidth < 10)
+	if (img->map_height < 10 || img->map_width < 10)
 	{
-		minimap->vis_width = img->mapWidth;
-		minimap->vis_height = img->mapHeight;
+		minimap->vis_width = img->map_width;
+		minimap->vis_height = img->map_height;
 	}
 	else
 	{
@@ -73,8 +73,8 @@ void	calculate_visible_area(t_data *img, t_minimap *minimap)
 		minimap->vis_x = 0;
 	if (minimap->vis_y < 0)
 		minimap->vis_y = 0;
-	if (minimap->vis_x + minimap->vis_width > img->mapWidth)
-		minimap->vis_x = img->mapWidth - minimap->vis_width;
-	if (minimap->vis_y + minimap->vis_height > img->mapHeight)
-		minimap->vis_y = img->mapHeight - minimap->vis_height;
+	if (minimap->vis_x + minimap->vis_width > img->map_width)
+		minimap->vis_x = img->map_width - minimap->vis_width;
+	if (minimap->vis_y + minimap->vis_height > img->map_height)
+		minimap->vis_y = img->map_height - minimap->vis_height;
 }

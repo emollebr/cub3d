@@ -6,7 +6,7 @@
 /*   By: lejimene <lejimene@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 15:13:28 by lejimene          #+#    #+#             */
-/*   Updated: 2024/01/29 17:48:40 by emollebr         ###   ########.fr       */
+/*   Updated: 2024/01/26 17:33:10 by lejimene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,14 +75,14 @@ void	update_door_animation_open(t_door *doors)
 
 int	draw_doors(t_data *img, t_door *doors, int x, t_ray *ray)
 {
-	if (!doors->isOpen)
+	if (!doors->is_open)
 	{
 		calculate_door_parameters(ray, img, doors);
 		draw_door_lines(img, ray, doors, x);
 		update_door_animation(doors);
 		doors->open_ = false;
 	}
-	else if (doors->isOpen)
+	else if (doors->is_open)
 	{
 		calculate_door_parameters(ray, img, doors);
 		draw_door_lines(img, ray, doors, x);

@@ -42,10 +42,10 @@ g++ *.cpp -lSDL
 #define screenHeight 480
 #define texWidth 64 // must be power of two
 #define texHeight 64 // must be power of two
-#define mapWidth 24
-#define mapHeight 24
+#define map_width 24
+#define map_height 24
 
-int worldMap[mapWidth][mapHeight] =
+int world_map[map_width][map_height] =
 {
   {8,8,8,8,8,8,8,8,8,8,8,4,4,6,4,4,6,4,6,4,4,4,6,4},
   {8,0,0,0,0,0,0,0,0,0,8,4,0,0,0,0,0,0,0,0,0,0,0,4},
@@ -109,10 +109,10 @@ int main(int /*argc*/, char */*argv*/[])
     for(int y = screenHeight / 2 + 1; y < screenHeight; ++y)
     {
       // rayDir for leftmost ray (x = 0) and rightmost ray (x = w)
-      float rayDirX0 = dirX - planeX;
-      float rayDirY0 = dirY - planeY;
-      float rayDirX1 = dirX + planeX;
-      float rayDirY1 = dirY + planeY;
+      float ray_dir_x0 = dirX - planeX;
+      float ray_dir_y0 = dirY - planeY;
+      float ray_dir_x1 = dirX + planeX;
+      float ray_dir_y1 = dirY + planeY;
 
       // Current y position compared to the center of the screen (the horizon)
       int p = y - screenHeight / 2;
@@ -122,7 +122,7 @@ int main(int /*argc*/, char */*argv*/[])
       // matching also how the walls are being raycasted. For different values
       // than 0.5, a separate loop must be done for ceiling and floor since
       // they're no longer symmetrical.
-      float posZ = 0.5 * screenHeight;
+      float pos_z = 0.5 * screenHeight;
 
       // Horizontal distance from the camera to the floor for the current row.
       // 0.5 is the z position exactly in the middle between floor and ceiling.
@@ -130,40 +130,40 @@ int main(int /*argc*/, char */*argv*/[])
       // except for perfectly horizontal and vertical surfaces like the floor.
       // NOTE: this formula is explained as follows: The camera ray goes through
       // the following two points: the camera itself, which is at a certain
-      // height (posZ), and a point in front of the camera (through an imagined
+      // height (pos_z), and a point in front of the camera (through an imagined
       // vertical plane containing the screen pixels) with horizontal distance
-      // 1 from the camera, and vertical position p lower than posZ (posZ - p). When going
+      // 1 from the camera, and vertical position p lower than pos_z (pos_z - p). When going
       // through that point, the line has vertically traveled by p units and
       // horizontally by 1 unit. To hit the floor, it instead needs to travel by
-      // posZ units. It will travel the same ratio horizontally. The ratio was
-      // 1 / p for going through the camera plane, so to go posZ times farther
-      // to reach the floor, we get that the total horizontal distance is posZ / p.
-      float rowDistance = posZ / p;
+      // pos_z units. It will travel the same ratio horizontally. The ratio was
+      // 1 / p for going through the camera plane, so to go pos_z times farther
+      // to reach the floor, we get that the total horizontal distance is pos_z / p.
+      float rowDistance = pos_z / p;
 
       // calculate the real world step vector we have to add for each x (parallel to camera plane)
       // adding step by step avoids multiplications with a weight in the inner loop
-      float floorStepX = rowDistance * (rayDirX1 - rayDirX0) / screenWidth;
-      float floorStepY = rowDistance * (rayDirY1 - rayDirY0) / screenWidth;
+      float floorStepX = rowDistance * (ray_dir_x1 - ray_dir_x0) / screenWidth;
+      float floorStepY = rowDistance * (ray_dir_y1 - ray_dir_y0) / screenWidth;
 
       // real world coordinates of the leftmost column. This will be updated as we step to the right.
-      float floorX = posX + rowDistance * rayDirX0;
-      float floorY = posY + rowDistance * rayDirY0;
+      float floorX = posX + rowDistance * ray_dir_x0;
+      float floorY = posY + rowDistance * ray_dir_y0;
 
       for(int x = 0; x < screenWidth; ++x)
       {
         // the cell coord is simply got from the integer parts of floorX and floorY
-        int cellX = (int)(floorX);
-        int cellY = (int)(floorY);
+        int cell_x = (int)(floorX);
+        int cell_y = (int)(floorY);
 
         // get the texture coordinate from the fractional part
-        int tx = (int)(texWidth * (floorX - cellX)) & (texWidth - 1);
-        int ty = (int)(texHeight * (floorY - cellY)) & (texHeight - 1);
+        int tx = (int)(texWidth * (floorX - cell_x)) & (texWidth - 1);
+        int ty = (int)(texHeight * (floorY - cell_y)) & (texHeight - 1);
 
         floorX += floorStepX;
         floorY += floorStepY;
 
         // choose texture and draw the pixel
-        int checkerBoardPattern = (int(cellX + cellY)) & 1;
+        int checkerBoardPattern = (int(cell_x + cell_y)) & 1;
         int floorTexture;
         if(checkerBoardPattern == 0) floorTexture = 3;
         else floorTexture = 4;
@@ -249,7 +249,7 @@ int main(int /*argc*/, char */*argv*/[])
           side = 1;
         }
         //Check if ray has hit a wall
-        if(worldMap[mapX][mapY] > 0) hit = 1;
+        if(world_map[mapX][mapY] > 0) hit = 1;
       }
 
       //Calculate distance of perpendicular ray (Euclidean distance would give fisheye effect!)
@@ -265,7 +265,7 @@ int main(int /*argc*/, char */*argv*/[])
       int drawEnd = lineHeight / 2 + h / 2;
       if(drawEnd >= h) drawEnd = h - 1;
       //texturing calculations
-      int texNum = worldMap[mapX][mapY] - 1; //1 subtracted from it so that texture 0 can be used!
+      int texNum = world_map[mapX][mapY] - 1; //1 subtracted from it so that texture 0 can be used!
 
       //calculate value of wallX
       double wallX; //where exactly the wall was hit
@@ -274,9 +274,9 @@ int main(int /*argc*/, char */*argv*/[])
       wallX -= floor((wallX));
 
       //x coordinate on the texture
-      int texX = int(wallX * double(texWidth));
-      if(side == 0 && rayDirX > 0) texX = texWidth - texX - 1;
-      if(side == 1 && rayDirY < 0) texX = texWidth - texX - 1;
+      int tex_x = int(wallX * double(texWidth));
+      if(side == 0 && rayDirX > 0) tex_x = texWidth - tex_x - 1;
+      if(side == 1 && rayDirY < 0) tex_x = texWidth - tex_x - 1;
 
       // TODO: an integer-only bresenham or DDA like algorithm could make the texture coordinate stepping faster
       // How much to increase the texture coordinate per screen pixel
@@ -286,9 +286,9 @@ int main(int /*argc*/, char */*argv*/[])
       for(int y = drawStart; y < drawEnd; y++)
       {
         // Cast the texture coordinate to integer, and mask with (texHeight - 1) in case of overflow
-        int texY = (int)texPos & (texHeight - 1);
+        int tex_y = (int)texPos & (texHeight - 1);
         texPos += step;
-        Uint32 color = texture[texNum][texHeight * texY + texX];
+        Uint32 color = texture[texNum][texHeight * tex_y + tex_x];
         //make color darker for y-sides: R, G and B byte each divided through two with a "shift" and an "and"
         if(side == 1) color = (color >> 1) & 8355711;
         buffer[y][x] = color;
@@ -337,9 +337,9 @@ int main(int /*argc*/, char */*argv*/[])
         double currentFloorX = weight * floorXWall + (1.0 - weight) * posX;
         double currentFloorY = weight * floorYWall + (1.0 - weight) * posY;
 
-        int floorTexX, floorTexY;
-        floorTexX = int(currentFloorX * texWidth) & (texWidth - 1);
-        floorTexY = int(currentFloorY * texHeight) & (texHeight - 1);
+        int floortex_x, floortex_y;
+        floortex_x = int(currentFloorX * texWidth) & (texWidth - 1);
+        floortex_y = int(currentFloorY * texHeight) & (texHeight - 1);
 
         int checkerBoardPattern = ((int)currentFloorX + (int)currentFloorY) & 1;
         int floorTexture;
@@ -347,9 +347,9 @@ int main(int /*argc*/, char */*argv*/[])
         else floorTexture = 4;
 
         //floor
-        buffer[y][x] = (texture[floorTexture][texWidth * floorTexY + floorTexX] >> 1) & 8355711;
+        buffer[y][x] = (texture[floorTexture][texWidth * floortex_y + floortex_x] >> 1) & 8355711;
         //ceiling (symmetrical)
-        buffer[h - y][x] = texture[6][texWidth * floorTexY + floorTexX];
+        buffer[h - y][x] = texture[6][texWidth * floortex_y + floortex_x];
       }
 #endif // !FLOOR_HORIZONTAL
     }
@@ -371,14 +371,14 @@ int main(int /*argc*/, char */*argv*/[])
     //move forward if no wall in front of you
     if (keyDown(SDLK_UP))
     {
-      if(worldMap[int(posX + dirX * moveSpeed)][int(posY)] == false) posX += dirX * moveSpeed;
-      if(worldMap[int(posX)][int(posY + dirY * moveSpeed)] == false) posY += dirY * moveSpeed;
+      if(world_map[int(posX + dirX * moveSpeed)][int(posY)] == false) posX += dirX * moveSpeed;
+      if(world_map[int(posX)][int(posY + dirY * moveSpeed)] == false) posY += dirY * moveSpeed;
     }
     //move backwards if no wall behind you
     if(keyDown(SDLK_DOWN))
     {
-      if(worldMap[int(posX - dirX * moveSpeed)][int(posY)] == false) posX -= dirX * moveSpeed;
-      if(worldMap[int(posX)][int(posY - dirY * moveSpeed)] == false) posY -= dirY * moveSpeed;
+      if(world_map[int(posX - dirX * moveSpeed)][int(posY)] == false) posX -= dirX * moveSpeed;
+      if(world_map[int(posX)][int(posY - dirY * moveSpeed)] == false) posY -= dirY * moveSpeed;
     }
     //rotate to the right
     if(keyDown(SDLK_RIGHT))

@@ -29,9 +29,9 @@ int	perform_dda_doors(t_ray *ray, t_data *img)
 			ray->map_y += ray->step_y;
 			ray->side = 1;
 		}
-		if (img->worldMap[ray->map_y][ray->map_x] == 1)
+		if (img->world_map[ray->map_y][ray->map_x] == 1)
 			ray->hit = 1;
-		if (img->worldMap[ray->map_y][ray->map_x] == 2)
+		if (img->world_map[ray->map_y][ray->map_x] == 2)
 			ray->hit = 2;
 	}
 	return (0);

@@ -12,25 +12,25 @@
 
 #include "../includes/cub3d.h"
 
-void	handle_collision(t_data *img, double oldPlayerX, double oldPlayerY)
+void	handle_collision(t_data *img, double oldplayer_x, double oldplayer_y)
 {
-	if (img->worldMap[(int)oldPlayerY][(int)img->player.x] == 1
-		|| (img->worldMap[(int)img->player.y][(int)img->player.x] == 2
-			&& !img->doors.isOpen))
-		img->player.x = oldPlayerX;
-	if (img->worldMap[(int)img->player.y][(int)oldPlayerX] == 1
-		|| (img->worldMap[(int)img->player.y][(int)img->player.x] == 2
-			&& !img->doors.isOpen))
-		img->player.y = oldPlayerY;
+	if (img->world_map[(int)oldplayer_y][(int)img->player.x] == 1
+		|| (img->world_map[(int)img->player.y][(int)img->player.x] == 2
+			&& !img->doors.is_open))
+		img->player.x = oldplayer_x;
+	if (img->world_map[(int)img->player.y][(int)oldplayer_x] == 1
+		|| (img->world_map[(int)img->player.y][(int)img->player.x] == 2
+			&& !img->doors.is_open))
+		img->player.y = oldplayer_y;
 }
 
 void	move_player(t_data *img, double mov_speed, int direction)
 {
-	double	oldPlayerX;
-	double	oldPlayerY;
+	double	oldplayer_x;
+	double	oldplayer_y;
 
-	oldPlayerX = img->player.x;
-	oldPlayerY = img->player.y;
+	oldplayer_x = img->player.x;
+	oldplayer_y = img->player.y;
 	if (direction == 'w')
 	{
 		img->player.x += img->player.dir_x * mov_speed;
@@ -41,7 +41,7 @@ void	move_player(t_data *img, double mov_speed, int direction)
 		img->player.x -= img->player.dir_x * mov_speed;
 		img->player.y -= img->player.dir_y * mov_speed;
 	}
-	handle_collision(img, oldPlayerX, oldPlayerY);
+	handle_collision(img, oldplayer_x, oldplayer_y);
 }
 
 void	strafe_player(t_data *img, double mov_speed, int direction)
@@ -63,13 +63,13 @@ void	strafe_player(t_data *img, double mov_speed, int direction)
 
 void	rotate_player(t_data *img, double rot_speed, int direction)
 {
-	double	oldDirX;
-	double	oldPlaneX;
+	double	olddir_x;
+	double	oldplane_x;
 	double	cos_rot;
 	double	sin_rot;
 
-	oldDirX = img->player.dir_x;
-	oldPlaneX = img->player.plane_x;
+	olddir_x = img->player.dir_x;
+	oldplane_x = img->player.plane_x;
 	img->player.old_player_x = img->player.x;
 	img->player.old_player_y = img->player.y;
 	if (direction == 'a')
@@ -82,10 +82,10 @@ void	rotate_player(t_data *img, double rot_speed, int direction)
 		cos_rot = cos(rot_speed);
 		sin_rot = sin(rot_speed);
 	}
-	img->player.dir_x = oldDirX * cos_rot - img->player.dir_y * sin_rot;
-	img->player.dir_y = oldDirX * sin_rot + img->player.dir_y * cos_rot;
-	img->player.plane_x = oldPlaneX * cos_rot - img->player.plane_y * sin_rot;
-	img->player.plane_y = oldPlaneX * sin_rot + img->player.plane_y * cos_rot;
+	img->player.dir_x = olddir_x * cos_rot - img->player.dir_y * sin_rot;
+	img->player.dir_y = olddir_x * sin_rot + img->player.dir_y * cos_rot;
+	img->player.plane_x = oldplane_x * cos_rot - img->player.plane_y * sin_rot;
+	img->player.plane_y = oldplane_x * sin_rot + img->player.plane_y * cos_rot;
 	handle_collision(img, img->player.old_player_x, img->player.old_player_y);
 }
 

@@ -39,10 +39,10 @@ g++ *.cpp -lSDL
 #define screenHeight 480
 #define texWidth 64
 #define texHeight 64
-#define mapWidth 24
-#define mapHeight 24
+#define map_width 24
+#define map_height 24
 
-int worldMap[mapWidth][mapHeight]=
+int world_map[map_width][map_height]=
 {
   {4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,7,7,7,7,7,7,7,7},
   {4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,0,0,0,0,0,7},
@@ -185,7 +185,7 @@ int main(int /*argc*/, char */*argv*/[])
           side = 1;
         }
         //Check if ray has hit a wall
-        if(worldMap[mapX][mapY] > 0) hit = 1;
+        if(world_map[mapX][mapY] > 0) hit = 1;
       }
 
       //Calculate distance of perpendicular ray (Euclidean distance would give fisheye effect!)
@@ -205,7 +205,7 @@ int main(int /*argc*/, char */*argv*/[])
       if(drawEnd >= h) drawEnd = h - 1;
 
       //texturing calculations
-      int texNum = worldMap[mapX][mapY] - 1; //1 subtracted from it so that texture 0 can be used!
+      int texNum = world_map[mapX][mapY] - 1; //1 subtracted from it so that texture 0 can be used!
 
       //calculate value of wallX
       double wallX; //where exactly the wall was hit
@@ -214,9 +214,9 @@ int main(int /*argc*/, char */*argv*/[])
       wallX -= floor((wallX));
 
       //x coordinate on the texture
-      int texX = int(wallX * double(texWidth));
-      if(side == 0 && rayDirX > 0) texX = texWidth - texX - 1;
-      if(side == 1 && rayDirY < 0) texX = texWidth - texX - 1;
+      int tex_x = int(wallX * double(texWidth));
+      if(side == 0 && rayDirX > 0) tex_x = texWidth - tex_x - 1;
+      if(side == 1 && rayDirY < 0) tex_x = texWidth - tex_x - 1;
 
       // TODO: an integer-only bresenham or DDA like algorithm could make the texture coordinate stepping faster
       // How much to increase the texture coordinate per screen pixel
@@ -226,9 +226,9 @@ int main(int /*argc*/, char */*argv*/[])
       for(int y = drawStart; y < drawEnd; y++)
       {
         // Cast the texture coordinate to integer, and mask with (texHeight - 1) in case of overflow
-        int texY = (int)texPos & (texHeight - 1);
+        int tex_y = (int)texPos & (texHeight - 1);
         texPos += step;
-        Uint32 color = texture[texNum][texHeight * texY + texX];
+        Uint32 color = texture[texNum][texHeight * tex_y + tex_x];
         //make color darker for y-sides: R, G and B byte each divided through two with a "shift" and an "and"
         if(side == 1) color = (color >> 1) & 8355711;
         buffer[y][x] = color;
@@ -252,14 +252,14 @@ int main(int /*argc*/, char */*argv*/[])
     //move forward if no wall in front of you
     if(keyDown(SDLK_UP))
     {
-      if(worldMap[int(posX + dirX * moveSpeed)][int(posY)] == false) posX += dirX * moveSpeed;
-      if(worldMap[int(posX)][int(posY + dirY * moveSpeed)] == false) posY += dirY * moveSpeed;
+      if(world_map[int(posX + dirX * moveSpeed)][int(posY)] == false) posX += dirX * moveSpeed;
+      if(world_map[int(posX)][int(posY + dirY * moveSpeed)] == false) posY += dirY * moveSpeed;
     }
     //move backwards if no wall behind you
     if(keyDown(SDLK_DOWN))
     {
-      if(worldMap[int(posX - dirX * moveSpeed)][int(posY)] == false) posX -= dirX * moveSpeed;
-      if(worldMap[int(posX)][int(posY - dirY * moveSpeed)] == false) posY -= dirY * moveSpeed;
+      if(world_map[int(posX - dirX * moveSpeed)][int(posY)] == false) posX -= dirX * moveSpeed;
+      if(world_map[int(posX)][int(posY - dirY * moveSpeed)] == false) posY -= dirY * moveSpeed;
     }
     //rotate to the right
     if(keyDown(SDLK_RIGHT))

@@ -12,26 +12,6 @@
 
 #include "../includes/cub3d.h"
 
-void	calculate_wall_values(t_ray *ray, t_data *img, int *tex_num,
-		double *wall_x, unsigned int *tex_x)
-{
-	if (ray->side == 0)
-	{
-		*wall_x = img->player.y + ray->perp_wall_dist * ray->ray_dir_y;
-		*tex_num = (ray->ray_dir_x > 0) * 2 + (ray->ray_dir_x <= 0) * 3;
-	}
-	else
-	{
-		*wall_x = img->player.x + ray->perp_wall_dist * ray->ray_dir_x;
-		*tex_num = (ray->ray_dir_y > 0) * 0 + (ray->ray_dir_y <= 0) * 1;
-	}
-	*wall_x -= floor(*wall_x);
-	*tex_x = (unsigned int)(*wall_x * img->textures[*tex_num].width);
-	if ((ray->side == 0 && ray->ray_dir_x > 0) || (ray->side == 1
-			&& ray->ray_dir_y < 0))
-		*tex_x = img->textures[*tex_num].width - *tex_x - 1;
-}
-
 void	draw_textured_wall(t_data *img, t_ray *ray, int x)
 {
 	int				tex_num;
@@ -40,7 +20,7 @@ void	draw_textured_wall(t_data *img, t_ray *ray, int x)
 	unsigned int	tex[2];
 	unsigned int	color;
 
-	calculate_wall_values(ray, img, &tex_num, &wall_x, &tex[0]);
+	tex[0] = calculate_wall_values(ray, img, &tex_num, &wall_x);
 	y = ray->draw_start;
 	while (y < ray->draw_end)
 	{
@@ -58,42 +38,42 @@ void	draw_textured_wall(t_data *img, t_ray *ray, int x)
 void	initialize_floor_values(t_data *img, int y,
 		t_floor_values *floor_values)
 {
-	floor_values->rayDirX0 = img->player.dir_x - img->player.plane_x;
-	floor_values->rayDirY0 = img->player.dir_y - img->player.plane_y;
-	floor_values->rayDirX1 = img->player.dir_x + img->player.plane_x;
-	floor_values->rayDirY1 = img->player.dir_y + img->player.plane_y;
+	floor_values->ray_dir_x0 = img->player.dir_x - img->player.plane_x;
+	floor_values->ray_dir_y0 = img->player.dir_y - img->player.plane_y;
+	floor_values->ray_dir_x1 = img->player.dir_x + img->player.plane_x;
+	floor_values->ray_dir_y1 = img->player.dir_y + img->player.plane_y;
 	floor_values->p = y - HEIGHT / 2;
-	floor_values->posZ = 0.5 * HEIGHT;
-	floor_values->row_distance = floor_values->posZ / floor_values->p;
+	floor_values->pos_z = 0.5 * HEIGHT;
+	floor_values->row_distance = floor_values->pos_z / floor_values->p;
 	floor_values->floor_step_x = floor_values->row_distance
-		* (floor_values->rayDirX1 - floor_values->rayDirX0) / WIDTH;
+		* (floor_values->ray_dir_x1 - floor_values->ray_dir_x0) / WIDTH;
 	floor_values->floor_step_y = floor_values->row_distance
-		* (floor_values->rayDirY1 - floor_values->rayDirY0) / WIDTH;
+		* (floor_values->ray_dir_y1 - floor_values->ray_dir_y0) / WIDTH;
 	floor_values->floor_x = img->player.x + floor_values->row_distance
-		* floor_values->rayDirX0;
+		* floor_values->ray_dir_x0;
 	floor_values->floor_y = img->player.y + floor_values->row_distance
-		* floor_values->rayDirY0;
-	floor_values->tex_width_F = img->textures[l_F].width;
-	floor_values->tex_height_F = img->textures[l_F].height;
-	floor_values->ceil_tex_width_C = img->textures[l_C].width;
-	floor_values->ceil_tex_height_C = img->textures[l_C].height;
+		* floor_values->ray_dir_y0;
+	floor_values->tex_width_f = img->textures[l_F].width;
+	floor_values->tex_height_f = img->textures[l_F].height;
+	floor_values->ceil_tex_width_c = img->textures[l_C].width;
+	floor_values->ceil_tex_height_c = img->textures[l_C].height;
 	floor_values->x = 0;
 }
 
 void	calculate_floor_values(t_floor_values *floor_values)
 {
-	floor_values->cellX = (int)floor_values->floor_x;
-	floor_values->cellY = (int)floor_values->floor_y;
-	floor_values->tx = (int)((floor_values->floor_x - floor_values->cellX)
-			* floor_values->tex_width_F) & (floor_values->tex_width_F - 1);
-	floor_values->ty = (int)((floor_values->floor_y - floor_values->cellY)
-			* floor_values->tex_height_F) & (floor_values->tex_height_F - 1);
-	floor_values->ceil_tx = (int)((floor_values->floor_x - floor_values->cellX)
-			* floor_values->ceil_tex_width_C) & (floor_values->ceil_tex_width_C
+	floor_values->cell_x = (int)floor_values->floor_x;
+	floor_values->cell_y = (int)floor_values->floor_y;
+	floor_values->tx = (int)((floor_values->floor_x - floor_values->cell_x)
+			* floor_values->tex_width_f) & (floor_values->tex_width_f - 1);
+	floor_values->ty = (int)((floor_values->floor_y - floor_values->cell_y)
+			* floor_values->tex_height_f) & (floor_values->tex_height_f - 1);
+	floor_values->ceil_tx = (int)((floor_values->floor_x - floor_values->cell_x)
+			* floor_values->ceil_tex_width_c) & (floor_values->ceil_tex_width_c
 			- 1);
-	floor_values->ceil_ty = (int)((floor_values->floor_y - floor_values->cellY)
-			* floor_values->ceil_tex_height_C)
-		& (floor_values->ceil_tex_height_C - 1);
+	floor_values->ceil_ty = (int)((floor_values->floor_y - floor_values->cell_y)
+			* floor_values->ceil_tex_height_c)
+		& (floor_values->ceil_tex_height_c - 1);
 	floor_values->floor_x += floor_values->floor_step_x;
 	floor_values->floor_y += floor_values->floor_step_y;
 }

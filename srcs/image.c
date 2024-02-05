@@ -36,6 +36,8 @@ void	ft_sprintf(char *relative_path, int current_anim_frame)
 	relative_path[j++] = 'p';
 	relative_path[j++] = 'm';
 	relative_path[j] = '\0';
+	free(num_str);
+	free(base_path);
 }
 
 void	draw_overlay_image(t_data *img, void *overlay_img, int overlay_width,
@@ -93,26 +95,16 @@ void	*load_overlay_image(t_data *img, t_keys *keys, int *img_width,
 
 void	update_image(t_data *img, t_keys *keys)
 {
-	int img_width;
-	int img_height;
-	void *overlay_img[3];
+	int		img_width;
+	int		img_height;
+	void	*overlay_img[3];
 
 	overlay_img[0] = load_overlay_image(img, keys, &img_width, &img_height);
 	overlay_img[1] = mlx_xpm_file_to_image(img->mlx, "./images/hbhbjhb.xpm",
 			&img_width, &img_height);
 	overlay_img[2] = tumor_anim(img, &img_width, &img_height);
 	if (overlay_img != NULL)
-	{
-		mlx_put_image_to_window(img->mlx, img->mlx_win, img->img, 0, 0);
-		draw_overlay_image(img, overlay_img[0], img_width, img_height);
-		render_minimap(img);
-		draw_overlay_image(img, overlay_img[1], img_width, img_height);
-		draw_overlay_image(img, overlay_img[2], img_width, img_height);
-		mlx_do_sync(img->mlx);
-		mlx_destroy_image(img->mlx, overlay_img[0]);
-		mlx_destroy_image(img->mlx, overlay_img[1]);
-		mlx_destroy_image(img->mlx, overlay_img[2]);
-	}
+		sync_overlay_images(img, overlay_img, img_width, img_height);
 	else
 	{
 		perror("Error loading overlay image.\n");

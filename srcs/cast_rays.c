@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: emollebr <emollebr@student.42berlin.d      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/01/29 16:43:32 by emollebr          #+#    #+#             */
-/*   Updated: 2024/01/29 16:43:34 by emollebr         ###   ########.fr       */
+/*   Created: 2024/02/02 13:38:15 by emollebr          #+#    #+#             */
+/*   Updated: 2024/02/02 13:38:17 by emollebr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ void	perform_dda(t_ray *ray, t_data *img)
 			ray->map_y += ray->step_y;
 			ray->side = 1;
 		}
-		if (img->worldMap[ray->map_y][ray->map_x] == 1)
+		if (img->world_map[ray->map_y][ray->map_x] == 1)
 			ray->hit = 1;
 	}
 }
@@ -68,10 +68,6 @@ void	calculate_perp_wall_dist(t_ray *ray, t_data *img)
 	else
 		ray->perp_wall_dist = (ray->map_y - img->player.y + (1 - ray->step_y)
 				/ 2) / ray->ray_dir_y;
-}
-
-void	draw_textured_walls_and_update(t_data *img, t_ray *ray, int x)
-{
 	ray->line_height = (int)(HEIGHT / ray->perp_wall_dist);
 	ray->draw_start = -ray->line_height / 2 + HEIGHT / 2;
 	ray->draw_end = ray->line_height / 2 + HEIGHT / 2;
@@ -79,6 +75,10 @@ void	draw_textured_walls_and_update(t_data *img, t_ray *ray, int x)
 		ray->draw_start = 0;
 	if (ray->draw_end >= HEIGHT)
 		ray->draw_end = HEIGHT - 1;
+}
+
+void	draw_textured_walls_and_update(t_data *img, t_ray *ray, int x)
+{
 	draw_textured_wall(img, ray, x);
 	ray->hit = 0;
 	img->z_buffer[x] = ray->perp_wall_dist;
