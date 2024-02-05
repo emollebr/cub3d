@@ -6,7 +6,7 @@
 /*   By: lejimene <lejimene@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 16:11:37 by lejimene          #+#    #+#             */
-/*   Updated: 2024/01/26 18:08:19 by lejimene         ###   ########.fr       */
+/*   Updated: 2024/02/05 14:54:24 by lejimene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -107,5 +107,7 @@ int	key_press(int keycode, t_keys *keys)
 			[(int)keys->img->player.x] != 2)
 			keys->img->doors.is_open = !keys->img->doors.is_open;
 	}
+	if (keycode == 65307)
+        close_program(keys->img);
 	return (0);
 }

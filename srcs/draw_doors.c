@@ -6,7 +6,7 @@
 /*   By: lejimene <lejimene@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/26 15:13:28 by lejimene          #+#    #+#             */
-/*   Updated: 2024/01/26 17:33:10 by lejimene         ###   ########.fr       */
+/*   Updated: 2024/02/05 15:23:46 by lejimene         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ void	calculate_door_parameters(t_ray *ray, t_data *img, t_door *doors)
 {
 	doors->tex_num = 16 + doors->current_anim_frame;
 	if (ray->side == 0)
-		doors->wall_x = img->player.x + ray->perp_wall_dist * ray->ray_dir_y;
+		doors->wall_x = img->player.y + ray->perp_wall_dist * ray->ray_dir_y;
 	else
 		doors->wall_x = img->player.x + ray->perp_wall_dist * ray->ray_dir_x;
 	doors->wall_x -= floor(doors->wall_x);
