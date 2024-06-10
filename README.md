@@ -1,6 +1,6 @@
 # CUB3D - Raycaster
 
-A graphic engine using a minimal graphic library, inspired by Wolfenstein 3D.
+A raycaster game using a minimal graphic library, inspired by Wolfenstein 3D.
 Developed by [Levi Jimenez](https://github.com/pepelevi) and [Esther Møllebro](https://github.com/emollebr).
 
 ### To install on Linux / Windows:
